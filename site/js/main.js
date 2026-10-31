@@ -13,7 +13,6 @@
   var TITLES = scenes.map(function (s) { return s.getAttribute('data-title') || ''; });
   var statusEl = document.getElementById('scene-status');
   var STATUS = (statusEl && statusEl.getAttribute('data-tpl')) || '{n}/{total}: {title}';
-  var waterline = document.querySelector('.waterline');
   var mqRM = window.matchMedia('(prefers-reduced-motion: reduce)');
   var coarseMQ = window.matchMedia('(pointer: coarse)');
   var EASE = 'cubic-bezier(.2,.7,.2,1)';
@@ -104,7 +103,7 @@
     '  float c = length(p) - uR;',
     '  float k = uMove.x; if (k < 0.001) return c;',
     '  vec2 t = p + uMove.yz * uR * 0.62 * k;',
-    '  return smin(c, length(t) - uR * (1.0 - 0.42 * k), 0.45 * uR);',
+    '  return smin(c, length(t) - uR * (1.0 - 0.42 * k), max(0.45 * uR * clamp(k * 3.0, 0.0, 1.0), 0.01));',
     '}',
     'vec3 inner(vec2 q){ vec2 uv = clamp(q / uSize, 0.001, 0.999); return texture2D(uTex, vec2(uv.x, uv.y * 0.5)).rgb; }',
     'vec3 frame(vec2 q){ vec2 uv = clamp(q / uSize, 0.001, 0.999); return texture2D(uTex, vec2(uv.x, 0.5 + uv.y * 0.5)).rgb; }',
@@ -221,7 +220,7 @@
     var c = Math.hypot(x, y) - r;
     if (D.k < 0.001) return c;
     var tx = x + D.dx * r * 0.62 * D.k, ty = y + D.dy * r * 0.62 * D.k;
-    return smin(c, Math.hypot(tx, ty) - r * (1 - 0.42 * D.k), 0.45 * r);
+    return smin(c, Math.hypot(tx, ty) - r * (1 - 0.42 * D.k), Math.max(0.45 * r * clamp(D.k * 3, 0, 1), 0.01));
   }
   function clampTarget(x, y) {
     var m = R * 0.4 + 8;
@@ -270,20 +269,22 @@
     }
 
     /* пружины */
-    var kP = touchMode ? 220 : 170, zP = touchMode ? .82 : .78;
+    var kP = touchMode ? 220 : 170, zP = touchMode ? .95 : .92;
     if (D.visible || D.alpha > 0) {
       spring(D, 'x', 'vx', D.tx, kP, zP, dt);
       spring(D, 'y', 'vy', D.ty, kP, zP, dt);
     }
     var sp = Math.hypot(D.vx, D.vy);
-    var kt = Math.min(1, sp / 900);
-    spring(D, 'k', 'kv', kt, 260, .45, dt);
-    if (D.k < 0) D.k = 0;
+    /* хвост: гладкое приближение без пружины (без отскока), при остановке плавно исчезает; радиус не трогаем */
+    var kt = clamp((sp - 90) / 900, 0, 1);
+    D.k += (kt - D.k) * (1 - Math.exp(-dt * (kt > D.k ? 14 : 5)));
+    if (D.k < 0.002) D.k = 0;
+    D.kv = 0;
     if (sp > 40) { D.dx = D.vx / sp; D.dy = D.vy / sp; }
     D.still = sp < 30 ? D.still + dt : 0;
 
     if (D.visible) {
-      spring(D, 'ap', 'av', 1, 300, .60, dt);
+      spring(D, 'ap', 'av', 1, 300, 1, dt);
       D.alpha = Math.min(1, D.alpha + dt / .16);
     } else {
       D.ap += (.6 - D.ap) * (1 - Math.exp(-dt * 10)); D.av = 0;
@@ -295,13 +296,15 @@
   /* ---------- рыбы ---------- */
   var FISH = { 1:[196,16],2:[155,20],3:[168,18],4:[78,30],5:[62,30],6:[180,22],7:[91,20],8:[176,12],9:[128,18],10:[137,16],11:[200,13],12:[165,15],13:[300,8],14:[172,19],15:[148,21],16:[62,18],17:[54,20],18:[66,16],19:[58,34],20:[50,38],21:[64,32],22:[280,9] };
   var KIND = { 1:'carp',2:'carp',3:'carp',4:'carp',5:'carp',6:'carp',7:'carp',8:'carp',9:'carp',10:'carp',22:'carp',11:'pike',12:'pike',13:'pike',14:'sazan',15:'sazan',16:'crucian',17:'crucian',18:'crucian',19:'roach',20:'roach',21:'roach' };
+  /* KP: параметры вида. tf/tc: скорость поворота (испуг/спокойно), cr: множитель спокойной скорости, wg: вилянье курса,
+     dm: пик рывка (в единицах спокойной скорости), ut: скорость U-turn, ff/fc: частота хвоста, modes: веса режимов */
   var KP = {
-    carp:  { dMin: .08, dMax: .16, fm: 1,    cap: 260, tf: 7,   tc: 1.6, wn: 1,   pause: .6, ret: 1.5, calm: 2.5, fc: 2,   ff: 6 },
-    sazan: { dMin: .07, dMax: .14, fm: 1.1,  cap: 270, tf: 7,   tc: 1.6, wn: 1,   pause: .6, ret: 1.5, calm: 2.5, fc: 2,   ff: 6 },
-    pike:  { dMin: .04, dMax: .08, fm: 1.35, cap: 340, tf: 10,  tc: 1.2, wn: .5,  pause: .4, ret: 2.0, calm: 1.5, fc: 1.2, ff: 7 },
-    amur:  { dMin: .14, dMax: .24, fm: .8,   cap: 210, tf: 4.5, tc: 1.0, wn: .7,  pause: .9, ret: 1.2, calm: 3.5, fc: 1.6, ff: 4.5 },
-    crucian: { dMin: .10, dMax: .20, fm: .9, cap: 220, tf: 5.5, tc: 1.4, wn: .9, pause: .8, ret: 1.3, calm: 3.0, fc: 1.8, ff: 5 },
-    roach: { dMin: .03, dMax: .07, fm: 1.4, cap: 360, tf: 11, tc: 2.0, wn: 1.4, pause: .3, ret: 2.2, calm: 1.2, fc: 2.6, ff: 8 }
+    carp:  { dMin: .08, dMax: .16, fm: 1,    cap: 260, tf: 7,   tc: 1.6, wn: 1,   pause: .6, ret: 1.5, calm: 2.5, fc: 1.6, ff: 6,   cr: 1.2,  wg: .30, dm: 6, ut: 2.4, modes: { cruise: 3, glide: 3, uturn: 2, dash: .5 } },
+    sazan: { dMin: .07, dMax: .14, fm: 1.1,  cap: 270, tf: 7,   tc: 1.6, wn: 1,   pause: .6, ret: 1.5, calm: 2.5, fc: 1.6, ff: 6,   cr: 1.2,  wg: .28, dm: 6, ut: 2.4, modes: { cruise: 3, glide: 3.5, uturn: 1.5, dash: .6 } },
+    pike:  { dMin: .04, dMax: .08, fm: 1.35, cap: 340, tf: 10,  tc: 1.2, wn: .5,  pause: .4, ret: 2.0, calm: 1.5, fc: 1.0, ff: 7.5, cr: 1.1,  wg: .12, dm: 15, ut: 3, modes: { ambush: 4, dash: 2, cruise: 1.4, uturn: 1, glide: .8 } },
+    amur:  { dMin: .14, dMax: .24, fm: .8,   cap: 210, tf: 4.5, tc: 1.0, wn: .7,  pause: .9, ret: 1.2, calm: 3.5, fc: 1.6, ff: 4.5, cr: 1.1,  wg: .2,  dm: 4, ut: 2, modes: { cruise: 3, glide: 3 } },
+    crucian: { dMin: .10, dMax: .20, fm: .9, cap: 220, tf: 5.5, tc: 1.4, wn: .9, pause: .8, ret: 1.3, calm: 3.0, fc: 1.4, ff: 5,   cr: 1.15, wg: .35, dm: 5, ut: 2.2, modes: { glide: 3, cruise: 3, uturn: 1.5, zigzag: 1.2 } },
+    roach: { dMin: .03, dMax: .07, fm: 1.4, cap: 360, tf: 11, tc: 2.4, wn: 1.4, pause: .3, ret: 2.2, calm: 1.2, fc: 2.2, ff: 8.5, cr: 1.3,  wg: .30, dm: 6, ut: 2.6, modes: { school: 4, zigzag: 2, dash: 1.4, cruise: 1 } }
   };
   var SETS = {
     desk: [1,2,6,7,9,10,22,11,12,13,14,15,16,17,18,19,20,21],
@@ -356,7 +359,7 @@
     img.src = 'img/fish/fish-' + pad2(id) + '.svg';
   }
 
-  var school = { gx: 0, gy: 0, t: 0 };
+  var school = { gx: 0, gy: 0, t: 0, burst: 0 };
   function pickGoal(f, top, bot, away) {
     var mx = Math.max(60, W * .06), lo = top + 24, hi = bot - 30;
     if (f.k === KP.roach || f.k === KP.crucian) { if (W < 600) hi = Math.min(hi, top + (bot - top) * .5); }
@@ -371,6 +374,62 @@
     return { x: gx, y: clamp(gy, lo, hi) };
   }
 
+  /* ---------- поведенческие режимы ---------- */
+  var MODE_DUR = { cruise: [4, 9], glide: [2.5, 6], zigzag: [3, 6], ambush: [3, 8], school: [7, 13], dash: [1.0, 1.5], uturn: [9, 9] };
+  var fishActive = 0;
+  function isActive(m) { return m === 'dash' || m === 'uturn'; }
+  function rr(a, b) { return a + Math.random() * (b - a); }
+
+  function nextMode(f) {
+    if (f.force) { var fm = f.force; f.force = null; return fm; }
+    var w = f.k.modes, lim = fishActive >= Math.max(1, Math.round(fishList.length * .25)), tot = 0, c = [], key;
+    for (key in w) {
+      if (key === f.mode && key !== 'cruise' && key !== 'school') continue;
+      if (lim && isActive(key)) continue;
+      c.push(key); tot += w[key];
+    }
+    if (!c.length) return 'cruise';
+    var r = Math.random() * tot;
+    for (var i = 0; i < c.length; i++) { r -= w[c[i]]; if (r <= 0) return c[i]; }
+    return c[c.length - 1];
+  }
+  /* курс, при котором прямой путь длиной len остаётся в воде */
+  function safeHeading(f, len, base, spread) {
+    var mx = Math.max(50, W * .05), lo = waterTop() + 36, hi = waterBot() - 40;
+    for (var n = 0; n < 12; n++) {
+      var h = base + (Math.random() - .5) * spread;
+      var ex = f.x + Math.cos(h) * len, ey = f.y + Math.sin(h) * len;
+      if (ex > mx && ex < W - mx && ey > lo && ey < hi) return h;
+    }
+    return Math.atan2((lo + hi) / 2 - f.y, W / 2 - f.x) + (Math.random() - .5) * .5;
+  }
+  function setMode(f, m, vMul) {
+    if (isActive(f.mode)) fishActive--;
+    var k = f.k, u = f.v0 * f.s * vMul, d = MODE_DUR[m] || [4, 8];
+    f.mode = m; f.mt = f.mt0 = rr(d[0], d[1]); f.ph = 0;
+    if (isActive(m)) fishActive++;
+    if (m === 'dash') {
+      f.dk = f.dmk || k.dm; f.dmk = 0;
+      f.dh = safeHeading(f, u * f.dk * .9, f.heading, Math.random() < .25 ? 6.28 : 2.6);
+    } else if (m === 'uturn') {
+      f.pt = rr(1.8, 3.4);
+      f.dh = safeHeading(f, u * k.ut * f.pt * 1.1 + 100, f.heading, 1.4);
+      var perp = f.dh + Math.PI / 2, px = f.x + Math.cos(perp) * 70, py = f.y + Math.sin(perp) * 70;
+      var ok = px > 50 && px < W - 50 && py > waterTop() + 40 && py < waterBot() - 40;
+      f.tdir = ok ? 1 : -1;
+      f.tamt = rr(2.6, 3.5);
+    } else if (m === 'glide') {
+      f.hTarget = f.heading + (Math.random() - .5) * 1.4; f.g2 = false;
+    } else if (m === 'zigzag') {
+      f.zb = f.heading; f.zs = Math.random() < .5 ? -1 : 1; f.zt = rr(.3, .7);
+      if (!f.home || Math.hypot(f.home.x - f.x, f.home.y - f.y) < 80) f.home = pickGoal(f, waterTop(), waterBot());
+    } else if (m === 'ambush') {
+      f.hTarget = f.heading + (Math.random() - .5) * .8; f.dmk = k.dm * 1.3; f.force = 'dash';
+    } else if (m === 'cruise') {
+      if (!f.home || Math.hypot(f.home.x - f.x, f.home.y - f.y) < 90) f.home = pickGoal(f, waterTop(), waterBot());
+    }
+  }
+
   function makeFish() {
     var key = W >= 1024 ? 'desk' : W >= 600 ? 'tab' : 'phone';
     if (key === fishSetKey) return;
@@ -380,6 +439,7 @@
     var top = waterTop(), bot = H - 10;
     var order = ids.slice().sort(function () { return Math.random() - .5; });
     var schoolX = (.15 + Math.random() * .6) * W, schoolY = top + 30 + Math.random() * Math.max(10, (bot - top) * .4);
+    fishActive = 0;
     fishList = ids.map(function (id) {
       var slot = order.indexOf(id);
       var hx = (slot + 0.15 + Math.random() * 0.7) / ids.length * W;
@@ -391,15 +451,22 @@
       return {
         k: kp, id: id, v0: FISH[id][1], seed: Math.random() * 100,
         home: { x: hx, y: hy }, x: hx, y: hy,
-        heading: Math.random() * Math.PI * 2, ang: 0,
+        heading: Math.random() * Math.PI * 2, ang: 0, hTarget: 0, hRate: 1,
         kx: 0, ky: 0, boost: 1, inT: 0, outT: 99, delay: kp.dMin + Math.random() * (kp.dMax - kp.dMin),
-        returning: false, fleeing: false, phase: Math.random() * 6.28, speed: 0, hov: 0, hovT: 0, s: 1, depth: 0
+        returning: false, fleeing: false, phase: Math.random() * 6.28, speed: 0, hov: 0, hovT: 0, s: 1, depth: 0,
+        mode: 'cruise', mt: 0, mt0: 1, ph: 0, sp: 0, wig: .05, sq: 1, sgx: 0, sgy: 0, lag: Math.random() * .5
       };
     });
     fishList.forEach(function (f) {
-      f.ang = f.heading; f.flip = Math.cos(f.heading) < 0; f.wait = 0; f.tier = undefined; f.trip = 0;
+      f.ang = f.heading; f.flip = Math.cos(f.heading) < 0; f.tier = undefined;
       f.off = { x: (f.id - 19) * 45 + (Math.random() - .5) * 20, y: (Math.random() - .5) * 50 };
       if (KIND[f.id] !== 'roach') f.home = pickGoal(f, top, bot, 0);
+      f.sgx = schoolX; f.sgy = schoolY;
+      f.sp = f.v0 * 0.7;
+      f.s = lerp(0.45, 1.0, clamp((f.y - top) / Math.max(1, H - top), 0, 1)) * (W < 600 ? 0.6 : 1);
+      f.mode = 'cruise';
+      setMode(f, nextMode(f), touchMode ? .8 : 1);
+      f.mt = rr(.5, f.mt0);   // не все в одном режиме и в одной фазе
     });
     school.gx = schoolX; school.gy = schoolY; school.t = 6 + Math.random() * 6;
   }
@@ -415,21 +482,28 @@
     var sp = Math.hypot(D.vx, D.vy);
     var fear = D.still > 1.2 ? .25 : clamp(sp / 300, .25, 1);
     school.t -= dt;
+    if (school.burst > 0) school.burst -= dt;
     if (school.t <= 0) {
       var sf = null;
       for (var q = 0; q < fishList.length; q++) if (KIND[fishList[q].id] === 'roach') { sf = fishList[q]; break; }
       if (sf) { var g = pickGoal(sf, top, bot, Math.min(350, W * .3)); school.gx = g.x; school.gy = g.y; }
       school.t = 9 + Math.random() * 9;
+      if (Math.random() < .5) school.burst = rr(.9, 1.6);
     }
+    fishActive = 0;
+    for (var q2 = 0; q2 < fishList.length; q2++) if (isActive(fishList[q2].mode)) fishActive++;
 
     for (var i = 0; i < fishList.length; i++) {
       var f = fishList[i], k = f.k;
       var depth = clamp((f.y - top) / Math.max(1, H - top), 0, 1);
       var s = lerp(0.45, 1.0, depth) * (W < 600 ? 0.6 : 1);
+      f.s = s;
+      var u = f.v0 * s * vMul;
 
       var dx = f.x - D.x, dy = f.y - D.y;
       var d = Math.sqrt(dx * dx + dy * dy);
       var inZone = zoneOn && d < 1.1 * Req;
+      var wasFleeing = f.fleeing;
 
       if (inZone) {
         f.outT = 0; f.inT += dt;
@@ -443,65 +517,97 @@
         }
       } else { f.inT = 0; f.outT += dt; }
 
-      var m = 40, ef = 120 * dt;
-      if (f.x < m) f.kx += ef; else if (f.x > W - m) f.kx -= ef;
-      if (f.y < top + m) f.ky += ef; else if (f.y > bot - 20) f.ky -= ef;
-
       f.kx *= fr; f.ky *= fr;
       var km = Math.sqrt(f.kx * f.kx + f.ky * f.ky);
       if (km > k.cap) { f.kx *= k.cap / km; f.ky *= k.cap / km; km = k.cap; }
       if (km <= 30) f.fleeing = false;
-
       if (!inZone && f.boost > 1) f.boost = Math.max(1, f.boost - dt * (k.ret - 1) / k.calm);
 
-      var maxTurn;
+      var spT = 1, acc = 2, rate = k.tc;
       if (f.fleeing) {
         f.heading = turnToward(f.heading, Math.atan2(f.ky, f.kx), k.tf * dt);
-        maxTurn = k.tf * dt;
+        rate = k.tf; acc = 10; f.sq = 1;
       } else {
-        maxTurn = k.tc * dt;
-        var roach = KIND[f.id] === 'roach';
-        if (roach) {
-          var mxs = Math.max(60, W * .06);
-          f.home.x = clamp(school.gx + f.off.x, mxs, W - mxs); f.home.y = clamp(school.gy + f.off.y, top + 20, bot - 30);
+        if (wasFleeing) { setMode(f, 'cruise', vMul); f.mt = rr(1.5, 3); }
+        f.mt -= dt;
+        var m = f.mode;
+        if (m === 'cruise') {
+          if (Math.hypot(f.home.x - f.x, f.home.y - f.y) < 70) f.home = pickGoal(f, top, bot);
+          f.hTarget = Math.atan2(f.home.y - f.y, f.home.x - f.x) + Math.sin(t * .9 + f.seed) * k.wg + Math.sin(t * .37 + f.seed * 2) * k.wg * .6;
+          spT = k.cr; acc = 1.6; rate = k.tc;
+        } else if (m === 'dash') {
+          f.hTarget = f.dh; rate = k.tf * .8;
+          if (f.mt0 - f.mt < f.mt0 * .3) { spT = f.dk; acc = 9; } else { spT = .35; acc = 1.7; }   // рывок, затем трение
+        } else if (m === 'uturn') {
+          if (f.ph === 0) {
+            f.hTarget = f.dh; spT = k.ut; acc = 2; rate = k.tc * 1.2; f.pt -= dt;
+            if (f.pt <= 0) { f.ph = 1; f.tleft = f.tamt; }
+          } else if (f.ph === 1) {
+            var tr = 2.3, stp = Math.min(f.tleft, tr * dt);
+            f.heading += f.tdir * stp; f.tleft -= stp; f.hTarget = f.heading;
+            var pr = 1 - f.tleft / f.tamt;
+            spT = pr < .5 ? .3 : .9; acc = 3; rate = tr;
+            f.sq = 1 - .3 * Math.sin(Math.PI * pr);
+            if (f.tleft <= 0) { f.ph = 2; f.pt = rr(1.6, 3); f.dh = f.heading; f.sq = 1; }
+          } else {
+            f.hTarget = f.dh; spT = k.ut; acc = 2.5; rate = k.tc; f.pt -= dt;
+            if (f.pt <= 0) f.mt = 0;
+          }
+        } else if (m === 'glide') {
+          spT = .1; acc = 1.4; rate = .5;
+          if (f.mt < f.mt0 * .5 && !f.g2) { f.g2 = true; f.hTarget = f.heading + (Math.random() - .5) * 1.0; }
+        } else if (m === 'zigzag') {
+          f.zt -= dt;
+          if (f.zt <= 0) { f.zs = -f.zs; f.zt = rr(.3, .7); }
+          f.zb = turnToward(f.zb, Math.atan2(f.home.y - f.y, f.home.x - f.x), .9 * dt);
+          if (Math.hypot(f.home.x - f.x, f.home.y - f.y) < 80) f.home = pickGoal(f, top, bot);
+          f.hTarget = f.zb + f.zs * .75; spT = 1.2; acc = 3; rate = k.tf * .55;
+        } else if (m === 'ambush') {
+          spT = .02; acc = 2.5; rate = .7;
+        } else if (m === 'school') {
+          var mxs = Math.max(60, W * .06), kk = 1 - Math.exp(-dt / (.2 + f.lag));
+          f.sgx += (school.gx - f.sgx) * kk; f.sgy += (school.gy - f.sgy) * kk;   // каждая видит курс стаи с запаздыванием
+          f.home.x = clamp(f.sgx + f.off.x, mxs, W - mxs); f.home.y = clamp(f.sgy + f.off.y, top + 20, bot - 30);
+          var hd = Math.hypot(f.home.x - f.x, f.home.y - f.y);
+          f.hTarget = Math.atan2(f.home.y - f.y, f.home.x - f.x) + Math.sin(t * 1.3 + f.seed) * .22;
+          spT = (hd > 160 ? 1.7 : hd > 60 ? 1.25 : .7) * (school.burst > 0 ? 1.7 : 1); acc = 2.5; rate = k.tc;
         }
-        var hd = Math.hypot(f.home.x - f.x, f.home.y - f.y);
-        f.returning = false;
-        f.trip += dt;
-        if (hd < 70) {
-          if (f.wait <= 0) f.wait = 1.5 + Math.random() * 3.5;
-          f.wait -= dt;
-          if (f.wait <= 0 && !roach) { f.home = pickGoal(f, top, bot); f.trip = 0; f.wait = 0; }
-          f.heading += (noise(t * 0.15 + f.seed) - 0.5) * 1.2 * dt * 2 * k.wn;
-        } else {
-          f.wait = 0;
-          if (f.trip > 45 && !roach) { f.home = pickGoal(f, top, bot); f.trip = 0; }
-          var want = Math.atan2(f.home.y - f.y, f.home.x - f.x) + Math.sin(t * 0.7 + f.seed) * .3;
-          f.heading = turnToward(f.heading, want, maxTurn);
+        /* мягкие границы: у краёв курс заворачивает внутрь */
+        var em = Math.max(80, W * .07), emy = 60, rx = 0, ry = 0;
+        if (f.x < em) rx = 1 - f.x / em; else if (f.x > W - em) rx = -(1 - (W - f.x) / em);
+        if (f.y < top + emy) ry = 1 - (f.y - top) / emy; else if (f.y > bot - emy) ry = -(1 - (bot - f.y) / emy);
+        var rs = Math.min(1, Math.hypot(rx, ry));
+        if (rs > 0 && !(m === 'uturn' && f.ph === 1)) {
+          var inw = Math.atan2(ry, rx);
+          f.hTarget = f.hTarget + angDiff(f.hTarget, inw) * Math.min(1, rs * 1.6);
+          rate = Math.max(rate, k.tc * (1 + rs * 1.5));
+          if (m === 'uturn' || m === 'dash') f.dh = f.hTarget;
         }
-        /* мягкие границы: у краёв разворот внутрь */
-        var em = Math.max(80, W * .07), inx = f.x < em ? 0 : f.x > W - em ? Math.PI : null;
-        if (inx !== null && Math.cos(f.heading - inx) < 0) f.heading = turnToward(f.heading, inx, maxTurn * 1.5);
-        var iy = f.y < top + 50 ? Math.PI / 2 : f.y > bot - 50 ? -Math.PI / 2 : null;
-        if (iy !== null && Math.sin(f.heading) * Math.sign(iy) < 0) f.heading = turnToward(f.heading, iy, maxTurn * 1.5);
+        if (!(m === 'uturn' && f.ph === 1)) f.heading = turnToward(f.heading, f.hTarget, rate * dt);
+        if (f.mt <= 0) setMode(f, nextMode(f), vMul);
+        if (f.mode !== 'uturn') f.sq += (1 - f.sq) * Math.min(1, dt * 6);
       }
+      f.hRate = rate;
 
-      var speedCruise = f.v0 * s * f.boost * vMul * (f.fleeing || f.wait > 0 ? 1 : 1.35);
-      var vx = Math.cos(f.heading) * speedCruise + f.kx;
-      var vy = Math.sin(f.heading) * speedCruise + f.ky;
+      f.sp += (spT * u * f.boost - f.sp) * (1 - Math.exp(-acc * dt));
+      var vx = Math.cos(f.heading) * f.sp + f.kx;
+      var vy = Math.sin(f.heading) * f.sp + f.ky;
+      if (f.mode === 'glide' && !f.fleeing) vy += Math.sin(t * 1.3 + f.seed) * 4;
       f.x += vx * dt; f.y += vy * dt;
       f.x = clamp(f.x, -30, W + 30);
       f.y = clamp(f.y, top - 10, bot);
 
       var spd = Math.sqrt(vx * vx + vy * vy);
       f.speed = spd;
-      f.ang = turnToward(f.ang, Math.atan2(vy, vx), (f.fleeing ? k.tf : k.tc) * dt);
+      f.ang = turnToward(f.ang, spd > 2 ? Math.atan2(vy, vx) : f.heading, (f.fleeing ? k.tf : Math.max(k.tc, rate) * 1.3) * dt);
       var ca = Math.cos(f.ang);
       if (ca < -.15) f.flip = true; else if (ca > .15) f.flip = false;
 
-      var freq = lerp(k.fc, k.ff, clamp((spd - f.v0 * s) / 200, 0, 1));
+      var sn = clamp(spd / (u * 2.6), 0, 1);
+      var freq = lerp(k.fc * .5, k.ff, Math.sqrt(sn));   // частота хвоста растёт со скоростью
       f.phase += Math.PI * 2 * freq * dt;
-      f.s = s; f.depth = depth;
+      f.wig = .025 + .06 * sn;
+      f.depth = depth;
       f.hov = clamp(f.hov + (f.hovT - f.hov) * Math.min(1, dt / 0.15), 0, 1);
     }
   }
@@ -614,7 +720,7 @@
         w = sp.len * f.s; h = w * sp.aspect;
         ictx.save();
         ictx.translate(x + 10 * f.depth, y + 18 * f.depth);
-        ictx.rotate(f.ang + 0.05 * Math.sin(f.phase));
+        ictx.rotate(f.ang + f.wig * Math.sin(f.phase));
         if (f.flip) ictx.scale(1, -1); /* влево: отражаем, чтобы спина оставалась сверху */
         ictx.globalAlpha = .30;
         ictx.drawImage(sp.shadow, -w / 2, -h / 2, w, h);
@@ -629,8 +735,9 @@
         var a = clamp(.95 + f.hov * .15, 0, 1);
         ictx.save();
         ictx.translate(x, y);
-        ictx.rotate(f.ang + 0.05 * Math.sin(f.phase));
+        ictx.rotate(f.ang + f.wig * Math.sin(f.phase));
         if (f.flip) ictx.scale(1, -1);
+        ictx.scale(f.sq, 1);
         var t, vA, vB;
         if (f.depth < .5) { t = f.depth / .5; vA = sp.v[2]; vB = sp.v[1]; }
         else { t = (f.depth - .5) / .5; vA = sp.v[1]; vB = sp.v[0]; }
@@ -794,14 +901,14 @@
   /* ---------- указатель ---------- */
   function onTarget(e) { return e.target && e.target.closest && e.target.closest('a,button'); }
   /* v5: капля только над водой hero; не над небом, шапкой, заголовком, подписями и кнопками */
-  var textEls = [].slice.call(hero.querySelectorAll('h1 .t1, h1 .t2, .eyebrow, .rating-card, .hero-stats, .hero-addr, .hint, .btn, .link'));
+  var textEls = [].slice.call(hero.querySelectorAll('h1 .t1, h1 .t2, .eyebrow, .rating-card, .hero-stats, .hero-addr, .hint, .btn, .link, .scroll-hint'));
   var rng = document.createRange();
   function overText(cx, cy) {
     for (var i = 0; i < textEls.length; i++) {
       var el = textEls[i];
       if (!el.offsetParent && el.getClientRects().length === 0) continue;
       var r;
-      if (el.matches('.btn, .link, .rating-card')) r = el.getBoundingClientRect();
+      if (el.matches('.btn, .link, .rating-card, .scroll-hint')) r = el.getBoundingClientRect();
       else { rng.selectNodeContents(el); r = rng.getBoundingClientRect(); }
       if (!r.width || !r.height) continue;
       var top = r.top, bot = r.bottom;
@@ -818,6 +925,7 @@
     var rect = hero.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
+  var TOUCH_OFF = .7;   // центр капли выше пальца на 0.7 радиуса
   var tap = null, navPending = false;
 
   function fishGo(f, px, py) {
@@ -842,9 +950,7 @@
         if (tap.inside && !tap.moved) return;
       }
       mode = 'follow';
-      var ty = p.y - R - 24;
-      if (ty < R * .4 + 8) ty = p.y;
-      showDrop(p.x, ty);
+      showDrop(p.x, p.y - R * TOUCH_OFF);
       return;
     }
     if (touchMode) { touchMode = false; measure(); }
@@ -872,9 +978,7 @@
     hero.classList.add('used');
     mode = 'follow';
     if (!inside) {
-      var ty = p.y - R - 24;
-      if (ty < R * .4 + 8) ty = p.y;
-      showDrop(p.x, ty);
+      showDrop(p.x, p.y - R * TOUCH_OFF);
     }
   });
   function touchEnd(e) {
@@ -915,6 +1019,7 @@
      Сцены: менеджер, переходы, ввод
      ===================================================================== */
   var navLinks = [].slice.call(document.querySelectorAll('.scene-nav a'));
+  var vLinks = [].slice.call(document.querySelectorAll('.vnav a'));
   var cur = 0, busy = false, pendingIdx = null, lbOpen = false;
 
   function idxFromHash() {
@@ -976,6 +1081,9 @@
     navLinks.forEach(function (a, k) {
       if (k === i) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
     });
+    vLinks.forEach(function (a, k) {
+      if (k === i) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+    });
     cur = i;
     var inn = scenes[i].querySelector('.scene__inner');
     if (inn) inn.scrollTop = 0;
@@ -1018,82 +1126,29 @@
     root.classList.add('scene-changed');
     hero.classList.add('used');
 
-    var instant = o.instant || mqRM.matches || typeof from.animate !== 'function' || !waterline;
+    var instant = o.instant || mqRM.matches || typeof from.animate !== 'function';
     var after = function () { if (wantFocus || focusBefore) focusHeading(i); };
 
     if (instant) { setActive(i); after(); return true; }
 
-    var mFrom = from.getAttribute('data-medium'), mTo = to.getAttribute('data-medium');
-    var kind = mFrom === 'air' && mTo === 'water' ? 'toWater' : (mFrom === 'water' && mTo === 'air' ? 'toSurface' : 'slide');
-    var phone = stage.clientWidth < 600;
-    var anims = [];
-    var ox = o.ox != null ? o.ox : stage.clientWidth * 0.5;
-    var oy = o.oy != null ? o.oy : stage.clientHeight * 0.7;
-    var T_SWAP = kind === 'toWater' ? 620 : kind === 'toSurface' ? 260 : 220;
-    var T_END = kind === 'toWater' ? 1000 : kind === 'toSurface' ? 900 : 660;
-
+    /* вертикальный слайд: текущая сцена уезжает вверх, следующая въезжает снизу (назад наоборот); без заливок поверх */
+    var dir = i > cur ? 1 : -1;
+    var DUR = 720, EZ = 'cubic-bezier(.65,0,.35,1)';
     busy = true;
     from.classList.add('is-leaving');
-
-    if (kind === 'toWater') {
-      from.style.transformOrigin = ox + 'px ' + oy + 'px';
-      anims.push(from.animate([
-        { transform: 'scale(1) translateY(0)' },
-        { transform: phone ? 'scale(1.08) translateY(0)' : 'scale(1.16) translateY(-4%)' }
-      ], { duration: 620, easing: 'cubic-bezier(.55,0,.8,.25)', fill: 'forwards' }));
-      anims.push(waterline.animate([
-        { opacity: 1, transform: 'translateY(0)' },
-        { opacity: 1, transform: 'translateY(-50%)' }
-      ], { delay: 80, duration: 540, easing: 'cubic-bezier(.5,0,.5,1)', fill: 'forwards' }));
-    } else if (kind === 'toSurface') {
-      anims.push(waterline.animate([
-        { opacity: 0, transform: 'translateY(-50%)' },
-        { opacity: 1, transform: 'translateY(-50%)' }
-      ], { duration: 260, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' }));
-      anims.push(from.animate([{ transform: 'scale(1)' }, { transform: 'scale(.96)' }],
-        { duration: 260, easing: 'cubic-bezier(.55,0,.8,.25)', fill: 'forwards' }));
-    } else {
-      var dir = i > cur ? 1 : -1;
-      anims.push(from.animate([
-        { transform: 'translateX(0)', opacity: 1 },
-        { transform: 'translateX(' + (-6 * dir) + '%)', opacity: 0 }
-      ], { duration: 280, easing: 'cubic-bezier(.55,0,.8,.25)', fill: 'forwards' }));
-    }
-
-    wait(T_SWAP, function () {
-      if (kind === 'toWater') {
-        from.classList.remove('is-leaving');
-        setActive(i);
-        from.style.transformOrigin = '';
-        anims.push(to.animate([{ transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 380, easing: EASE }));
-        anims.push(waterline.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, easing: EASE, fill: 'forwards' }));
-        reveal(to, 60);
-      } else if (kind === 'toSurface') {
-        from.classList.remove('is-leaving');
-        setActive(i);
-        anims.push(to.animate([{ transform: 'scale(1.04)' }, { transform: 'scale(1)' }], { duration: 640, easing: EASE }));
-        anims.push(waterline.animate([{ transform: 'translateY(-50%)' }, { transform: 'translateY(2%)' }],
-          { duration: 560, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards' }));
-        wait(560, function () {
-          anims.push(waterline.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 80, easing: 'linear', fill: 'forwards' }));
-        });
-        reveal(to, 300);
-      } else {
-        setActive(i);
-        var dir2 = scenes.indexOf(to) > scenes.indexOf(from) ? 1 : -1;
-        anims.push(to.animate([
-          { transform: 'translateX(' + (6 * dir2) + '%)', opacity: 0 },
-          { transform: 'translateX(0)', opacity: 1 }
-        ], { duration: 440, easing: EASE }));
-        reveal(to, 100);
-      }
-      after();
-    });
-    wait(T_END, function () {
+    to.classList.add('is-entering');
+    var anims = [];
+    anims.push(to.animate([{ transform: 'translate3d(0,' + (100 * dir) + '%,0)' }, { transform: 'translate3d(0,0,0)' }],
+      { duration: DUR, easing: EZ, fill: 'both' }));
+    anims.push(from.animate([{ transform: 'translate3d(0,0,0)' }, { transform: 'translate3d(0,' + (-100 * dir) + '%,0)' }],
+      { duration: DUR, easing: EZ, fill: 'both' }));
+    setActive(i);
+    wait(DUR + 30, function () {
       anims.forEach(function (a) { try { a.cancel(); } catch (err3) {} });
       from.classList.remove('is-leaving');
-      from.style.transformOrigin = '';
+      to.classList.remove('is-entering');
       busy = false;
+      after();
       if (pendingIdx !== null) {
         var p = pendingIdx; pendingIdx = null;
         if (p !== cur) goTo(p, { via: 'hash' });
