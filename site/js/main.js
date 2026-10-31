@@ -1415,38 +1415,7 @@
   var links = [].slice.call(gallery.querySelectorAll('.g-link'));
   var TOTAL = links.length;
 
-  /* параллакс desktop */
-  var fineMQ = window.matchMedia('(pointer: fine)');
-  var par = { tx: 0, ty: 0, x: 0, y: 0, raf: 0, until: 0 };
-  function parTick(now) {
-    par.x += (par.tx - par.x) * .08; par.y += (par.ty - par.y) * .08;
-    gallery.style.setProperty('--px', par.x.toFixed(3));
-    gallery.style.setProperty('--py', par.y.toFixed(3));
-    if (now < par.until || Math.abs(par.tx - par.x) > .002 || Math.abs(par.ty - par.y) > .002) par.raf = requestAnimationFrame(parTick);
-    else par.raf = 0;
-  }
-  photos.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'touch' || mqRM.matches || !fineMQ.matches || window.innerWidth < 1024) return;
-    var r = photos.getBoundingClientRect();
-    par.tx = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1);
-    par.ty = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1);
-    par.until = performance.now() + 600;
-    if (!par.raf) par.raf = requestAnimationFrame(parTick);
-  });
-  /* параллакс ленты на телефоне */
-  var ribRaf = 0;
-  function ribbon() {
-    ribRaf = 0;
-    if (mqRM.matches || window.innerWidth >= 1024) return;
-    var vw = window.innerWidth;
-    gCards.forEach(function (c) {
-      var r = c.getBoundingClientRect();
-      if (r.right < -50 || r.left > vw + 50) return;
-      c.style.setProperty('--px', ((r.left + r.width / 2 - vw / 2) / vw).toFixed(3));
-      c.style.setProperty('--py', '0');
-    });
-  }
-  gallery.addEventListener('scroll', function () { if (!ribRaf) ribRaf = requestAnimationFrame(ribbon); }, { passive: true });
+  /* параллакс фото убран: из-за сдвигов на доли пикселя фото дрожали */
 
   /* счётчик ленты */
   if (gCount && 'IntersectionObserver' in window) {
