@@ -11,7 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&text=%D0%9F%D0%A0%D0%A3%D0%94%D0%A2%D0%9E%D0%A4%D0%95%D0%99%D0%9D%D0%AB%D0%99&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&text=%D0%90%D0%91%D0%92%D0%93%D0%94%D0%95%D0%96%D0%97%D0%98%D0%99%D0%9A%D0%9B%D0%9C%D0%9D%D0%9E%D0%9F%D0%A0%D0%A1%D0%A2%D0%A3%D0%A4%D0%A5%D0%A6%D0%A7%D0%A8%D0%A9%D0%AA%D0%AB%D0%AC%D0%AD%D0%AE%D0%AF%D0%B0%D0%B1%D0%B2%D0%B3%D0%B4%D0%B5%D0%B6%D0%B7%D0%B8%D0%B9%D0%BA%D0%BB%D0%BC%D0%BD%D0%BE%D0%BF%D1%80%D1%81%D1%82%D1%83%D1%84%D1%85%D1%86%D1%87%D1%88%D1%89%D1%8A%D1%8B%D1%8C%D1%8D%D1%8E%D1%8F%D0%81%D1%910123456789%E2%82%BD%20/.%2C%3A%E2%80%93%E2%80%94%C2%AB%C2%BB-%2B%25%21%C2%B7&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marck+Script&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/pond-dusk.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/style.css">
 <script>document.documentElement.classList.add('js','js-scenes');</script>
@@ -21,16 +22,19 @@
 <main class="stage">
   <header class="site-header">
     <a class="logo" href="#top">Пруд трофейный</a>
+    <span class="hdr-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.500-5.500 6.500-11A6.500 6.500 0 0 0 5.500 10C5.500 15.500 12 21 12 21z"/><circle cx="12" cy="10" r="2.300"/></svg><span><b>Мошковский район</b><i>Новосибирская область</i></span></span>
     <nav class="scene-nav" aria-label="Сцены сайта">
       <a href="#top" aria-current="location"><span class="nav__t">Пруд</span></a>
       <a href="#about"><span class="nav__t">О пруде</span></a>
-      <a href="#photos"><span class="nav__t">Фото</span></a>
       <a href="#prices"><span class="nav__t">Цены</span></a>
+      <a href="#photos"><span class="nav__t">Фото</span></a>
       <a href="#location"><span class="nav__t">Как добраться</span></a>
     </nav>
-    <span class="hdr-rating" title="4.7 рейтинг в 2ГИС"><span class="hdr-rating__s"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7 6.8 19.5l1-5.9L3.5 9.5l5.9-.8z"/></svg></span>4.7<span class="sr-only"> рейтинг в 2ГИС</span></span>
+    <span class="hdr-rating" title="4.7 рейтинг в 2ГИС"><span class="hdr-rating__s"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7 6.8 19.5l1-5.9L3.5 9.5l5.9-.8z"/></svg></span>4.7<span class="hdr-rating__l" aria-hidden="true">2ГИС</span><span class="sr-only"> рейтинг в 2ГИС</span></span>
   </header>
-  <nav class="vnav" aria-label="Сцены сайта"><a href="#top" title="Поверхность пруда" aria-label="Поверхность пруда" aria-current="location"></a><a href="#about" title="О пруде" aria-label="О пруде"></a><a href="#photos" title="Фото" aria-label="Фото"></a><a href="#prices" title="Цены" aria-label="Цены"></a><a href="#location" title="Как добраться" aria-label="Как добраться"></a></nav>
+  <nav class="vnav" aria-label="Сцены сайта"><a href="#top" title="Поверхность пруда" aria-label="Поверхность пруда" aria-current="location"></a><a href="#about" title="О пруде" aria-label="О пруде"></a><a href="#prices" title="Цены" aria-label="Цены"></a><a href="#photos" title="Фото" aria-label="Фото"></a><a href="#location" title="Как добраться" aria-label="Как добраться"></a></nav>
+
+  <nav class="tabbar" aria-label="Разделы сайта"><a href="#top" aria-current="location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg><span class="tabbar__t">Главная</span></a><a href="#about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5s6 6 6 10.2a6 6 0 0 1-12 0C6 9.500 12 3.500 12 3.500z"/><path d="M9.500 14.500a2.800 2.800 0 0 0 2.500 2"/></svg><span class="tabbar__t">О пруде</span></a><a href="#prices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.500 12.500V5.500a2 2 0 0 1 2-2h7l8 8-8.500 8.500z"/><circle cx="8" cy="8" r="1.200"/></svg><span class="tabbar__t">Цены</span></a><a href="#photos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.500" y="5" width="17" height="14" rx="3"/><circle cx="9" cy="10" r="1.500"/><path d="M4 17l5-4.500 3.500 3 3-2.500 4.500 4"/></svg><span class="tabbar__t">Фото</span></a><a href="#location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.500-5.500 6.500-11A6.500 6.500 0 0 0 5.500 10C5.500 15.500 12 21 12 21z"/><circle cx="12" cy="10" r="2.300"/></svg><span class="tabbar__t">Контакты</span></a></nav>
 
   <!-- сцена 0: поверхность -->
   <section class="scene hero is-active" id="top" data-scene="0" data-title="Поверхность пруда" data-medium="air" aria-labelledby="h-top">
@@ -41,16 +45,23 @@
 
     <div class="hero__content">
       <div class="rating-card" data-reveal><span class="rc__v"><span class="rc__s"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7 6.8 19.5l1-5.9L3.5 9.5l5.9-.8z"/></svg></span>4.7</span><span class="rc__l">рейтинг в 2ГИС</span></div>
-      <p class="eyebrow" data-reveal>Центр рыболовства</p>
+      <p class="eyebrow" data-reveal><span class="m-t">Центр рыболовства</span><span class="d-t">Рыболовный клуб · Мошковский район</span></p>
       <h1 id="h-top" tabindex="-1" data-reveal><span class="t1">Пруд</span> <span class="t2">трофейный</span></h1>
+      <p class="hero-tag d-only">Рыбаки, ждём вас на «Трофейном»!</p>
+      <p class="hero-lead d-only">Приезжайте на рыбалку — на день или на сутки. На берегу есть отдельные рыболовные секторы, беседки и места для отдыха. Можно приехать одному, с друзьями или семьёй.</p>
       <ul class="hero-stats"><li><b>68</b> оценок</li><li><b>52</b> отзыва</li><li><b>24/7</b> круглосуточно</li></ul>
+      <ul class="hero-svc" aria-label="Услуги"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12c3-4.500 8-5.500 12-3l4.500-3v12l-4.500-3c-4 2.500-9 1.500-12-3z"/><circle cx="7.500" cy="11" r=".6" fill="currentColor"/></svg><span>Платная рыбалка</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19L12 5l9 14z"/><path d="M12 5v14M9 19l3-6 3 6"/></svg><span>Кемпинг и отдых</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6z"/><path d="M6 10v9M12 10v9M18 10v9M4 19h16"/></svg><span>Беседки в аренду</span></li></ul>
       <p class="hero-addr">Мошковский район, Новосибирская область</p>
       <div class="hero__row">
-        <a class="btn" href="#location" data-reveal>Как добраться</a>
+        <a class="btn hero-cta d-only" href="#prices">Узнать условия рыбалки <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn--glass" href="#location" data-reveal>Как добраться</a>
         <a class="link" href="#prices" data-reveal>Цены</a>
+        <a class="hero-glass" href="tel:+79665053030"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.500h3l1.500 4-2 1.500a11 11 0 0 0 5.500 5.500l1.500-2 4 1.500v3a2 2 0 0 1-2 2A15 15 0 0 1 3 5.500a2 2 0 0 1 2-2z"/></svg><span>Позвонить</span></a>
+        <a class="hero-glass" href="https://yandex.com/maps/-/CXve7Mjh" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.500-5.500 6.500-11A6.500 6.500 0 0 0 5.500 10C5.500 15.500 12 21 12 21z"/><circle cx="12" cy="10" r="2.300"/></svg><span>Маршрут</span></a>
       </div>
-      <p class="hint"><span class="h-mouse">Ведите курсором: в стеклянной капле рыба. Клик по ней ведёт дальше</span><span class="h-touch">Ведите пальцем: в стеклянной капле рыба. Тап по ней ведёт дальше</span></p>
-      <a class="scroll-hint" href="#about" aria-label="Перейти к разделу «О пруде»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></a>
+      <p class="hint"><span class="h-mouse">Ведите курсором: в стеклянной капле рыба. Клик по ней ведёт дальше</span><span class="h-touch">Подержите палец на воде: появится линза с рыбами. Тап по ней ведёт дальше</span></p>
+      <a class="scroll-hint" href="#about" aria-label="Перейти к разделу «О пруде»"><span class="scroll-hint__t">Листайте, чтобы узнать больше</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></a>
+      <ul class="hero-adv d-only" aria-label="Преимущества"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.500"/><path d="M12 7v5l3 2"/></svg><span>Рыбалка<br>на день и сутки</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12c3-4.500 8-5.500 12-3l4.500-3v12l-4.500-3c-4 2.500-9 1.500-12-3z"/><circle cx="7.500" cy="11" r=".6" fill="currentColor"/></svg><span>Карп<br>и другая рыба</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6z"/><path d="M6 10v9M12 10v9M18 10v9M4 19h16"/></svg><span>Секторы<br>и беседки</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.500" width="16" height="14" rx="2.500"/><path d="M4 10h16M8 3.500v4M16 3.500v4"/></svg><span>Круглосуточная<br>работа</span></li></ul>
     </div>
   </section>
 
@@ -67,7 +78,13 @@
           <h2 class="h2" id="h-about" tabindex="-1" data-reveal>О пруде</h2>
           <p class="text" data-reveal>«Пруд трофейный» стоит в Мошковском районе Новосибирской области. Это центр рыболовства: у нас платная рыбалка и кемпинг, оборудование и беседки можно арендовать. Работаем круглосуточно, так что приезжайте в любой час. Гости оценили нас на 4.7 в 2ГИС: 68 оценок и 52 отзыва.</p>
           <p class="about__services" data-reveal>Платная рыбалка, кемпинг, аренда оборудования и беседок</p>
+          <div class="about__story d-only"><p class="d-kick">Всё начиналось с ручейка</p><p>Наш «Трофейный» начинался с небольшого ручейка. Постепенно мы готовили территорию, обустраивали места для рыбалки и отдыха.</p><p>Сейчас к нам приезжают на дневную и суточную рыбалку. Можно ловить на поплавочную удочку, фидер или карповые снасти. Для отдыха есть беседки, а при желании можно остаться на берегу подольше.</p></div>
         </div>
+        <div class="about__photo"><img src="img/gallery/gallery-01.webp" width="640" height="480" loading="lazy" decoding="async" alt="Туман над прудом, деревья отражаются в воде"></div>
+        <div class="about__pic d-only"><img src="img/gallery/gallery-02-lg.webp" width="1324" height="993" loading="lazy" decoding="async" alt="Утренний туман на берегу, палатка и солнце сквозь дымку"></div>
+        <ul class="about__tiles" aria-label="Что есть на пруде"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12c3-4.500 8-5.500 12-3l4.500-3v12l-4.500-3c-4 2.500-9 1.500-12-3z"/><circle cx="7.500" cy="11" r=".6" fill="currentColor"/></svg><span><span class="m-t">Платная рыбалка</span><span class="d-t">Рыболовные секторы</span></span></li><li><svg class="m-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19L12 5l9 14z"/><path d="M12 5v14M9 19l3-6 3 6"/></svg><svg class="d-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6z"/><path d="M6 10v9M12 10v9M18 10v9M4 19h16"/></svg><span><span class="m-t">Кемпинг</span><span class="d-t">Беседки для отдыха</span></span></li><li><svg class="m-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v11H4z"/><path d="M9 8V5h6v3M4 13h16"/></svg><svg class="d-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.500" width="16" height="14" rx="2.500"/><path d="M4 10h16M8 3.500v4M16 3.500v4M8 14h3"/></svg><span><span class="m-t">Аренда оборудования</span><span class="d-t">Дневная и суточная рыбалка</span></span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.500"/><path d="M12 7v5l3 2"/></svg><span><span class="m-t">Работаем круглосуточно</span><span class="d-t">Открыты круглосуточно</span></span></li></ul>
+        <a class="about__rate" href="https://2gis.ru/novosibirsk/firm/70000001067135012" target="_blank" rel="noopener"><span class="about__rate-v"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7 6.8 19.5l1-5.9L3.5 9.5l5.9-.8z"/></svg>4.7</span><span class="about__rate-t">68 оценок, 52 отзыва в 2ГИС</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="about__rate-c"><path d="M6 9l6 6 6-6"/></svg></a>
+        <div class="about__bar d-only"><span class="about__bar-r"><span class="about__bar-s"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7 6.8 19.5l1-5.9L3.5 9.5l5.9-.8z"/></svg></span><b>4.7</b><span>Рейтинг в 2ГИС</span></span><div class="about__bar-t"><b>Ваши отзывы помогают нам становиться лучше</b><span>Посмотрите оценки и впечатления рыболовов, которые уже были на нашем пруду.</span></div><a class="btn" href="https://2gis.ru/novosibirsk/firm/70000001067135012" target="_blank" rel="noopener">Отзывы в 2ГИС <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a></div>
         <div class="about__stats glass">
           <div class="stats" data-reveal>
             <div class="stat stat--rating"><div class="stat__v"><span class="stat__star"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7 6.8 19.5l1-5.9L3.5 9.5l5.9-.8z"/></svg></span>4.7</div><div class="stat__l">рейтинг в 2ГИС</div></div>
@@ -79,11 +96,55 @@
         </div>
       </div>
     </div>
-    <div class="scene-ctl" data-reveal><a class="link back" href="#top" aria-label="Вернуться к началу"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next" href="#photos" aria-label="Перейти к разделу «Фото»"><span class="next__t">Фото</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
+    <div class="scene-ctl" data-reveal><a class="link back" href="#top" aria-label="Вернуться к началу"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next" href="#prices" aria-label="Перейти к разделу «Цены»"><span class="next__t">Цены</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
   </section>
 
-  <!-- сцена 2: фото -->
-  <section class="scene scene--photos" id="photos" data-scene="2" data-title="Фото" data-medium="air" aria-labelledby="h-photos">
+  <!-- сцена 2: цены -->
+  <section class="scene scene--prices" id="prices" data-scene="2" data-title="Цены" data-medium="air" aria-labelledby="h-prices">
+    <div class="scene__bg"><div class="scene__photo" role="img" aria-label="Вечер у воды, удилища на подставке" data-bg="img/gallery/gallery-07-lg.webp" style="--pos: center 80%">
+        <noscript><img class="bg-img" src="img/gallery/gallery-07-lg.webp" alt="Вечер у воды, удилища на подставке" loading="lazy"></noscript>
+      </div></div>
+    <div class="scene__inner">
+      <div class="scene__body prices__grid">
+        <div class="prices__head glass">
+          <h2 class="h2" id="h-prices" tabindex="-1" data-reveal>Цены</h2>
+          <p class="d-kick d-only">Сколько стоит рыбалка</p>
+          <p class="prices__sub">Выберите подходящий тариф и приезжайте на рыбалку</p>
+          <p class="text" data-reveal>Можно приехать на несколько часов или остаться на сутки. Выбирайте подходящий тариф.</p>
+        </div>
+        <div class="prices__main">
+          <div class="prices__cards">
+          <article class="tariff tariff--day glass">
+            <h3 class="tariff__name">День</h3>
+            <p class="tariff__time"><span class="m-t">5:00–19:00</span><span class="d-t">с 5:00 до 19:00</span></p>
+            <p class="tariff__inc"><span class="m-t">2 кг карпа можно забрать с собой</span><span class="d-t">Включает 2 кг карпа, независимо от времени приезда</span></p>
+            <dl class="tariff__items"><div><dt>С рыбака</dt><dd class="price">800 ₽</dd></div><div><dt>Сектор с закрытой беседкой</dt><dd class="price">1000 ₽</dd></div></dl>
+            <a class="tariff__go" href="tel:+79665053030" aria-label="Позвонить и уточнить тариф «День»"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article><article class="tariff tariff--night glass">
+            <h3 class="tariff__name">Сутки</h3>
+            <p class="tariff__time"><span class="m-t">14:00–14:00</span><span class="d-t">с 14:00 до 14:00</span></p>
+            <p class="tariff__inc"><span class="m-t">3 кг карпа можно забрать с собой</span><span class="d-t">Включает 3 кг карпа, независимо от времени приезда</span></p>
+            <dl class="tariff__items"><div><dt>С рыбака</dt><dd class="price">1200 ₽</dd></div><div><dt>Сектор с закрытой беседкой</dt><dd class="price">1500 ₽</dd></div></dl>
+            <a class="tariff__go" href="tel:+79665053030" aria-label="Позвонить и уточнить тариф «Сутки»"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article><article class="tariff tariff--guest glass">
+            <div class="tariff__txt"><h3 class="tariff__name">Гость</h3><p class="tariff__inc"><span class="m-t">Не рыбак на территории клуба, без права занимать отдельный сектор</span><span class="d-t">Не рыбачит на территории клуба и не занимает отдельный сектор</span></p></div>
+            <p class="price">300 ₽</p>
+            <a class="tariff__go" href="tel:+79665053030" aria-label="Позвонить и уточнить тариф «Гость»"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          </div>
+          <div class="prices__notes glass">
+            <ul><li>Оплата сектора даёт право находиться в нём одному рыбаку, его супругу или супруге и двум детям до 12 лет. Остальные платят по тарифу «Гость».</li><li><span class="m-t">Ветераны и участники боевых действий получают скидку 50% на все тарифы.</span><span class="d-t">Ветеранам и участникам боевых действий — скидка 50% на все тарифы.</span></li><li class="d-only">При нарушении правил клуба будет отказано в посещении.</li><li>Беседка на 2–8 мест: 200 ₽ при аренде сектора для рыбалки, 1000 ₽ для отдыха.</li></ul>
+            <p class="prices__source prices__src2">Цены из прайса в группе ВКонтакте.</p><p class="prices__source">Цены уточняйте по телефону, в группе ВКонтакте или в чате Max</p>
+            <a class="act act--main" href="tel:+79665053030"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 2.5h2.4l1.1 3-1.5 1a8 8 0 0 0 3.3 3.3l1-1.5 3 1.1v2.4a1.2 1.2 0 0 1-1.3 1.2A10.6 10.6 0 0 1 2 3.8 1.2 1.2 0 0 1 3.2 2.5z"/></svg><span>Позвонить и уточнить</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="scene-ctl"><a class="link back" href="#about" aria-label="Вернуться к разделу «О пруде»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next" href="#photos" aria-label="Перейти к разделу «Фото»"><span class="next__t">Фото</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
+  </section>
+
+  <!-- сцена 3: фото -->
+  <section class="scene scene--photos" id="photos" data-scene="3" data-title="Фото" data-medium="air" aria-labelledby="h-photos">
     <div class="scene__bg"><div class="scene__photo" role="img" aria-label="Туман над прудом, деревья отражаются в воде" data-bg="img/gallery/gallery-01-lg.webp" style="--pos: 50% 55%">
         <noscript><img class="bg-img" src="img/gallery/gallery-01-lg.webp" alt="Туман над прудом, деревья отражаются в воде" loading="lazy"></noscript>
       </div></div>
@@ -91,7 +152,8 @@
       <div class="scene__body photos__grid">
         <div class="photos__head glass">
           <h2 class="h2" id="h-photos" tabindex="-1" data-reveal>Фото</h2>
-          <p class="photos__text" data-reveal>Туман над водой на рассвете, палатка на берегу, вечер с удилищами и карп в подсачеке. Приезжайте в любой сезон: мы работаем круглосуточно.</p>
+          <p class="d-kick d-only">Посмотрите, как у нас</p>
+          <p class="photos__text" data-reveal><span class="m-t">Туман над водой на рассвете, палатка на берегу, вечер с удилищами и карп в подсачеке. Приезжайте в любой сезон: мы работаем круглосуточно.</span><span class="d-t">Утренний туман над водой, палатки на берегу, вечерние закаты и рыбацкие уловы.</span></p>
           <p class="photos__credit">Фото: 2ГИС</p>
         </div>
         <div class="gallery" role="list" aria-label="Фото" data-reveal>
@@ -171,46 +233,7 @@
         <p class="gallery__count" aria-hidden="true">1 / 12</p>
       </div>
     </div>
-    <div class="scene-ctl"><a class="link back" href="#about" aria-label="Вернуться к разделу «О пруде»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next" href="#prices" aria-label="Перейти к разделу «Цены»"><span class="next__t">Цены</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
-  </section>
-
-  <!-- сцена 3: цены -->
-  <section class="scene scene--prices" id="prices" data-scene="3" data-title="Цены" data-medium="air" aria-labelledby="h-prices">
-    <div class="scene__bg"><div class="scene__photo" role="img" aria-label="Вечер у воды, удилища на подставке" data-bg="img/gallery/gallery-07-lg.webp" style="--pos: center 80%">
-        <noscript><img class="bg-img" src="img/gallery/gallery-07-lg.webp" alt="Вечер у воды, удилища на подставке" loading="lazy"></noscript>
-      </div></div>
-    <div class="scene__inner">
-      <div class="scene__body prices__grid">
-        <div class="prices__head glass">
-          <h2 class="h2" id="h-prices" tabindex="-1" data-reveal>Цены</h2>
-          <p class="text" data-reveal>Два тарифа на рыбалку, цена зависит от того, едете вы один или в сектор с закрытой беседкой.</p>
-        </div>
-        <div class="prices__main">
-          <div class="prices__cards">
-          <article class="tariff glass">
-            <h3 class="tariff__name">День</h3>
-            <p class="tariff__time">5:00–19:00</p>
-            <p class="tariff__inc">2 кг карпа можно забрать с собой</p>
-            <dl class="tariff__items"><div><dt>С рыбака</dt><dd class="price">800 ₽</dd></div><div><dt>Сектор с закрытой беседкой</dt><dd class="price">1000 ₽</dd></div></dl>
-          </article><article class="tariff glass">
-            <h3 class="tariff__name">Сутки</h3>
-            <p class="tariff__time">14:00–14:00</p>
-            <p class="tariff__inc">3 кг карпа можно забрать с собой</p>
-            <dl class="tariff__items"><div><dt>С рыбака</dt><dd class="price">1200 ₽</dd></div><div><dt>Сектор с закрытой беседкой</dt><dd class="price">1500 ₽</dd></div></dl>
-          </article><article class="tariff tariff--guest glass">
-            <div class="tariff__txt"><h3 class="tariff__name">Гость</h3><p class="tariff__inc">Не рыбак на территории клуба, без права занимать отдельный сектор</p></div>
-            <p class="price">300 ₽</p>
-          </article>
-          </div>
-          <div class="prices__notes glass">
-            <ul><li>Оплата сектора даёт право находиться в нём одному рыбаку, его супругу или супруге и двум детям до 12 лет. Остальные платят по тарифу «Гость».</li><li>Ветераны и участники боевых действий получают скидку 50% на все тарифы.</li><li>Беседка на 2–8 мест: 200 ₽ при аренде сектора для рыбалки, 1000 ₽ для отдыха.</li></ul>
-            <p class="prices__source">Цены уточняйте по телефону, в группе ВКонтакте или в чате Max</p>
-            <a class="act act--main" href="#" role="button" aria-disabled="true" title="Номер скрыт"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 2.5h2.4l1.1 3-1.5 1a8 8 0 0 0 3.3 3.3l1-1.5 3 1.1v2.4a1.2 1.2 0 0 1-1.3 1.2A10.6 10.6 0 0 1 2 3.8 1.2 1.2 0 0 1 3.2 2.5z"/></svg><span>Позвонить и уточнить</span></a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="scene-ctl"><a class="link back" href="#photos" aria-label="Вернуться к разделу «Фото»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next" href="#location" aria-label="Перейти к разделу «Как добраться»"><span class="next__t">Проезд</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
+    <div class="scene-ctl"><a class="link back" href="#prices" aria-label="Вернуться к разделу «Цены»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next" href="#location" aria-label="Перейти к разделу «Как добраться»"><span class="next__t">Проезд</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
   </section>
 
   <!-- сцена 4: как добраться -->
@@ -221,30 +244,66 @@
     <div class="scene__inner">
       <div class="scene__body loc__grid">
         <div class="loc__main glass">
+          <div class="loc__left">
           <h2 class="h2" id="h-loc" tabindex="-1" data-reveal>Как добраться</h2>
-          <p class="text" data-reveal>Мы в Мошковском районе Новосибирской области, работаем круглосуточно. Бронь и вопросы: по телефону, в группе ВКонтакте или в чате Max.</p>
+          <p class="d-kick d-only">Приезжайте на «Трофейный»</p>
+          <p class="text" data-reveal><span class="m-t">Мы в Мошковском районе Новосибирской области, работаем круглосуточно.</span><span class="d-t">Наш пруд находится в Мошковском районе Новосибирской области.</span></p>
+          <a class="btn loc__go d-only" href="https://yandex.com/maps/-/CXve7Mjh" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.500-5.500 6.500-11A6.500 6.500 0 0 0 5.500 10C5.500 15.500 12 21 12 21z"/><circle cx="12" cy="10" r="2.300"/></svg>Построить маршрут <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+          <a class="loc__map d-only" href="https://yandex.com/maps/-/CXve7Mjh" target="_blank" rel="noopener" aria-label="Пруд Трофейный на карте: открыть маршрут в Яндекс Картах">
+            <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
+<filter id="mFor" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".085 .11" numOctaves="5" seed="7"/><feColorMatrix type="matrix" values=".26 0 0 0 .03  0 .55 0 0 .12  .12 0 0 0 .05  0 0 0 0 1"/></filter>
+<filter id="mFld" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".015 .04" numOctaves="3" seed="2"/><feColorMatrix type="matrix" values=".24 0 0 0 .3  0 .26 0 0 .42  .1 0 0 0 .13  0 0 0 0 1"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+<filter id="mFld2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".02 .05" numOctaves="3" seed="11"/><feColorMatrix type="matrix" values=".3 0 0 0 .38  0 .24 0 0 .4  .1 0 0 0 .14  0 0 0 0 1"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+<filter id="mRough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9"/></filter>
+<filter id="mBlur"><feGaussianBlur stdDeviation="3.500"/></filter>
+<filter id="mBlur2"><feGaussianBlur stdDeviation="1.200"/></filter>
+<linearGradient id="mW" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b6275"/><stop offset=".5" stop-color="#1c3f52"/><stop offset="1" stop-color="#10293a"/></linearGradient>
+<radialGradient id="mV" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#05101a" stop-opacity="0"/><stop offset="1" stop-color="#05101a" stop-opacity=".62"/></radialGradient>
+<linearGradient id="mS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".16"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></linearGradient>
+<clipPath id="mC"><rect width="400" height="300"/></clipPath></defs>
+<g clip-path="url(#mC)">
+<rect width="400" height="300" filter="url(#mFor)"/>
+<g filter="url(#mBlur)" fill="#0f2514" opacity=".7"><ellipse cx="50" cy="45" rx="55" ry="38"/><ellipse cx="350" cy="40" rx="60" ry="34"/><ellipse cx="365" cy="250" rx="52" ry="42"/><ellipse cx="40" cy="262" rx="56" ry="34"/><ellipse cx="200" cy="18" rx="70" ry="20"/><ellipse cx="205" cy="288" rx="90" ry="20"/></g>
+<g filter="url(#mRough)"><path d="M232 118c34-20 86-26 124-8 28 14 52 38 52 74v18c-40 18-90 14-132-2-30-12-60-30-62-54z" fill="#000" filter="url(#mFld)"/><path d="M-10 200c38-14 78-8 104 14 16 14 26 34 20 58H-10z" filter="url(#mFld2)"/><path d="M262 -10h90c24 0 38 14 30 32-30 20-80 22-122 8z" filter="url(#mFld2)"/></g>
+<path d="M-6 188C60 172 100 190 150 210S250 240 290 232 360 196 410 206" fill="none" stroke="#e5ddbd" stroke-width="2.600" stroke-linecap="round" opacity=".78"/>
+<path d="M150 210C146 240 150 268 140 310" fill="none" stroke="#d6cfae" stroke-width="2" opacity=".7"/>
+<path d="M290 232C296 262 312 282 330 310" fill="none" stroke="#d6cfae" stroke-width="1.800" opacity=".6"/>
+<path d="M232 118C218 80 226 40 214 -6" fill="none" stroke="#d6cfae" stroke-width="1.600" stroke-dasharray="6 3" opacity=".55"/>
+<g filter="url(#mRough)"><path d="M104 168c-12-40 22-76 70-82 42-5 64 10 88 24 30 16 42 44 24 72-18 26-52 36-92 38-48 2-82-14-90-52z" fill="none" stroke="#c8b98a" stroke-width="10" opacity=".55" filter="url(#mBlur2)"/><path d="M104 168c-12-40 22-76 70-82 42-5 64 10 88 24 30 16 42 44 24 72-18 26-52 36-92 38-48 2-82-14-90-52z" fill="url(#mW)"/></g>
+<g fill="none" stroke-linecap="round"><path d="M138 130c24-16 56-18 84-6" stroke="#a9c9d6" stroke-width="2" opacity=".35"/><path d="M128 168c26 10 56 12 92 4" stroke="#a9c9d6" stroke-width="1.600" opacity=".25"/><path d="M180 100c14-4 28-2 40 4" stroke="#ffe6b8" stroke-width="2.400" opacity=".4"/></g>
+<ellipse cx="250" cy="124" rx="22" ry="5" fill="#ffd9a0" opacity=".2" filter="url(#mBlur2)"/>
+<rect width="400" height="300" fill="url(#mS)"/>
+<rect width="400" height="300" fill="url(#mV)"/>
+</g></svg>
+            <span class="loc__pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12z" fill="#e0a565" stroke="#8a5a1f" stroke-width="1"/><circle cx="12" cy="10" r="2.800" fill="#0f1a2a"/></svg><b>Пруд Трофейный</b></span>
+          </a>
           <dl class="facts-dl" data-reveal>
             <div><dt>Где</dt><dd>Мошковский район, Новосибирская область</dd></div>
             <div><dt>Режим</dt><dd>Круглосуточно</dd></div>
-            <div><dt>Телефон</dt><dd><span class="tel">+7 966 505-30-••</span></dd></div>
+            <div><dt>Телефон</dt><dd><a class="tel" href="tel:+79665053030">+7 966 505-30-30</a></dd></div>
             <div><dt>Услуги</dt><dd><ul class="chips"><li>Платная рыбалка</li><li>Кемпинг</li><li>Аренда оборудования</li><li>Аренда беседок</li></ul></dd></div>
           </dl>
+          <div class="loc__right">
           <div class="route" data-reveal>
             <h3 class="route__t">Маршрут</h3>
-            <ol class="route__list"><li>Из Новосибирска выезжайте на Пашинское шоссе</li><li>Дальше по трассе Р-255 «Сибирь» около 41 км</li><li>Поверните направо и проедьте ещё около 14 км до съезда</li><li>От съезда до пруда около 3 км по прямой</li></ol>
+            <ol class="route__list"><li><span class="m-t">Из Новосибирска выезжайте на Пашинское шоссе</span><span class="d-t">Из Новосибирска выезжайте на Пашинское шоссе.</span></li><li><span class="m-t">Дальше по трассе Р-255 «Сибирь» около 41 км</span><span class="d-t">Продолжайте движение по трассе Р-255 «Сибирь».</span></li><li><span class="m-t">Поверните направо и проедьте ещё около 14 км до съезда</span><span class="d-t">Поверните в сторону пруда по указателю.</span></li><li><span class="m-t">От съезда до пруда около 3 км по прямой</span><span class="d-t">Последний участок дороги до территории клуба.</span></li></ol>
             <p class="route__total">От центра Новосибирска около 74 км, в пути около 1,5 часа на машине</p>
-            <p class="route__note">Дорога нормальная, слегка скользкая, но проедет любая машина.</p>
+            <p class="route__note2 d-only">Состояние дороги зависит от погоды. При необходимости уточните это заранее.</p>
+            <p class="route__note">По отзывам гостей: дорога нормальная, слегка скользкая, но проедет любая машина.</p>
           </div>
           <div class="acts" data-reveal>
-            <a class="act act--main act--wide" href="#" role="button" aria-disabled="true" title="Номер скрыт"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 2.5h2.4l1.1 3-1.5 1a8 8 0 0 0 3.3 3.3l1-1.5 3 1.1v2.4a1.2 1.2 0 0 1-1.3 1.2A10.6 10.6 0 0 1 2 3.8 1.2 1.2 0 0 1 3.2 2.5z"/></svg><span>Позвонить</span></a>
-            <a class="act act--vk" href="https://vk.com/prud_trofejnyj" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.8 17.2C6.7 17.2 3.2 13 3 6h3c.1 5.1 2.4 7.300 4.200 7.700V6h2.900v4.400c1.800-.2 3.600-2.200 4.200-4.400h2.900c-.5 2.700-2.500 4.700-3.900 5.500 1.400.7 3.700 2.400 4.600 5.700h-3.200c-.7-2.200-2.400-3.900-4.600-4.100v4.100z"/></svg><span>Группа ВКонтакте</span></a>
-            <a class="act act--max" href="https://max.ru/join/8f7oFdsgol6fdedVZlO5ImYuajEOUdI6ZIW8fiLQYKA" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.500c-5.200 0-9.300 4-9.300 9 0 2.200.8 4.200 2.200 5.800L4 21.300l4.100-1.500c1.200.5 2.500.7 3.900.7 5.200 0 9.300-4 9.300-9s-4.100-9-9.300-9zm-3.200 11.300a1.300 1.300 0 1 1 0-2.600 1.300 1.300 0 0 1 0 2.600zm3.200 0a1.300 1.300 0 1 1 0-2.600 1.300 1.300 0 0 1 0 2.600zm3.200 0a1.300 1.300 0 1 1 0-2.600 1.300 1.300 0 0 1 0 2.600z"/></svg><span>Чат в Max</span></a>
-            <a class="act act--route act--wide" href="https://yandex.ru/maps/?rtext=~55.278031%2C83.771614~55.250983%2C83.749653&rtt=auto" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14s4.5-4 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 10 8 14 8 14z"/><circle cx="8" cy="6.5" r="1.6"/></svg><span>Маршрут в Яндекс Картах</span></a>
+            <a class="act act--main act--wide" href="tel:+79665053030"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 2.5h2.4l1.1 3-1.5 1a8 8 0 0 0 3.3 3.3l1-1.5 3 1.1v2.4a1.2 1.2 0 0 1-1.3 1.2A10.6 10.6 0 0 1 2 3.8 1.2 1.2 0 0 1 3.2 2.5z"/></svg><span>Позвонить</span></a>
+            <a class="act act--vk" href="https://vk.com/prud_trofejnyj" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.8 17.2C6.7 17.2 3.2 13 3 6h3c.1 5.1 2.4 7.300 4.200 7.700V6h2.900v4.400c1.800-.2 3.600-2.200 4.200-4.400h2.900c-.5 2.700-2.500 4.700-3.900 5.500 1.400.7 3.700 2.400 4.600 5.700h-3.200c-.7-2.200-2.400-3.900-4.600-4.100v4.100z"/></svg><span><span class="m-t">Группа ВКонтакте</span><span class="d-t">ВКонтакте</span></span></a>
+            <a class="act act--max" href="https://max.ru/join/8f7oFdsgol6fdedVZlO5ImYuajEOUdI6ZIW8fiLQYKA" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.500c-5.200 0-9.300 4-9.300 9 0 2.200.8 4.200 2.200 5.800L4 21.300l4.100-1.500c1.200.5 2.500.7 3.900.7 5.200 0 9.300-4 9.300-9s-4.100-9-9.300-9zm-3.200 11.300a1.300 1.300 0 1 1 0-2.600 1.300 1.300 0 0 1 0 2.600zm3.200 0a1.300 1.300 0 1 1 0-2.600 1.300 1.300 0 0 1 0 2.600zm3.200 0a1.300 1.300 0 1 1 0-2.600 1.300 1.300 0 0 1 0 2.600z"/></svg><span><span class="m-t">Чат в Max</span><span class="d-t">MAX</span></span></a>
+            <a class="act act--route act--wide" href="https://yandex.com/maps/-/CXve7Mjh" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14s4.5-4 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 10 8 14 8 14z"/><circle cx="8" cy="6.5" r="1.6"/></svg><span><span class="m-t">Маршрут в Яндекс Картах</span><span class="d-t">Построить маршрут</span></span></a>
             <a class="act act--wide" href="https://yandex.ru/maps/?pt=83.749653,55.250983&z=14&l=map" target="_blank" rel="noopener" aria-describedby="map-note"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14s4.5-4 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 10 8 14 8 14z"/><circle cx="8" cy="6.5" r="1.6"/></svg><span>Показать на карте</span></a>
+          </div>
           </div>
           <p class="map-note" id="map-note">Пруд отмечен на карте</p>
           <a class="ext" href="https://2gis.ru/novosibirsk/firm/70000001067135012" target="_blank" rel="noopener">Открыть карточку в 2ГИС <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l6-6M4 3h5v5"/></svg></a>
         </div>
+        <div class="loc__banner d-only"><h3>Пруд «Трофейный»</h3><p>Рыбалка и отдых в Мошковском районе Новосибирской области.</p><p class="loc__banner-a">Приезжайте на день, оставайтесь на сутки.</p><p class="loc__banner-s">Ни хвоста, ни чешуи!</p></div>
       </div>
       <footer class="site-footer glass" data-reveal>
         <p>Пруд трофейный. Центр рыболовства в Мошковском районе Новосибирской области. Работаем круглосуточно.</p>
@@ -253,7 +312,7 @@
         <p><a href="https://2gis.ru/novosibirsk/firm/70000001067135012" target="_blank" rel="noopener">Фото: 2ГИС</a></p>
       </footer>
     </div>
-    <div class="scene-ctl"><a class="link back" href="#prices" aria-label="Вернуться к разделу «Цены»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next next--up" href="#top" aria-label="Вернуться к началу"><span class="next__t">К началу</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
+    <div class="scene-ctl"><a class="link back" href="#photos" aria-label="Вернуться к разделу «Фото»"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg><span class="back__t">Назад</span></a><a class="btn next next--up" href="#top" aria-label="Вернуться к началу"><span class="next__t">К началу</span><span class="next__dot" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/></svg></span></a></div>
   </section>
 
 </main>

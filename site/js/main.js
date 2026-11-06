@@ -5,12 +5,36 @@
   var root = document.documentElement;
   var stage = document.querySelector('.stage');
   var scenes = [].slice.call(document.querySelectorAll('.scene'));
+  /* десктоп (от 1024): порядок меню и сцен как в макете: Пруд, О пруде, Фото, Цены, Как добраться; на телефоне Цены перед Фото */
+  var deskOrder = window.matchMedia('(min-width: 1024px)').matches;
+  if (deskOrder) {
+    var iPh = -1, iPr = -1;
+    scenes.forEach(function (s, k) { if (s.id === 'photos') iPh = k; if (s.id === 'prices') iPr = k; });
+    if (iPh > iPr && iPr > 0) { var tmp = scenes[iPh]; scenes[iPh] = scenes[iPr]; scenes[iPr] = tmp; }
+  }
   var hero = document.getElementById('top');
   if (!stage || !scenes.length || !hero) return;
   root.classList.add('js-scenes');
 
   var IDS = scenes.map(function (s) { return s.id; });
   var TITLES = scenes.map(function (s) { return s.getAttribute('data-title') || ''; });
+  if (deskOrder) {
+    var NEXT_T = { top: 'К началу', about: 'О пруде', photos: 'Фото', prices: 'Цены', location: 'Проезд' };
+    var BACK_T = { top: 'началу', about: 'разделу «О пруде»', photos: 'разделу «Фото»', prices: 'разделу «Цены»', location: 'разделу «Как добраться»' };
+    scenes.forEach(function (sc, k) {
+      var back = sc.querySelector('.scene-ctl .back'), next = sc.querySelector('.scene-ctl .next');
+      if (back && k > 0) { back.setAttribute('href', '#' + IDS[k - 1]); back.setAttribute('aria-label', 'Вернуться к ' + BACK_T[IDS[k - 1]]); }
+      if (next && k < IDS.length - 1) {
+        next.setAttribute('href', '#' + IDS[k + 1]);
+        next.setAttribute('aria-label', 'Перейти к разделу «' + TITLES[k + 1] + '»');
+        var nt = next.querySelector('.next__t'); if (nt) nt.textContent = NEXT_T[IDS[k + 1]];
+      }
+    });
+    ['.scene-nav', '.vnav'].forEach(function (q) {
+      var box = document.querySelector(q); if (!box) return;
+      IDS.forEach(function (id) { var a = box.querySelector('a[href="#' + id + '"]'); if (a) box.appendChild(a); });
+    });
+  }
   var statusEl = document.getElementById('scene-status');
   var STATUS = (statusEl && statusEl.getAttribute('data-tpl')) || '{n}/{total}: {title}';
   var mqRM = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -968,14 +992,14 @@
   /* ---------- указатель ---------- */
   function onTarget(e) { return e.target && e.target.closest && e.target.closest('a,button'); }
   /* v5: капля только над водой hero; не над небом, шапкой, заголовком, подписями и кнопками */
-  var textEls = [].slice.call(hero.querySelectorAll('h1 .t1, h1 .t2, .eyebrow, .rating-card, .hero-stats, .hero-addr, .hint, .btn, .link, .scroll-hint'));
+  var textEls = [].slice.call(hero.querySelectorAll('h1 .t1, h1 .t2, .eyebrow, .rating-card, .hero-stats, .hero-addr, .hint, .btn, .link, .scroll-hint, .hero-svc, .hero-glass, .hero-tag, .hero-lead, .hero-adv'));
   var rng = document.createRange();
   function overText(cx, cy) {
     for (var i = 0; i < textEls.length; i++) {
       var el = textEls[i];
       if (!el.offsetParent && el.getClientRects().length === 0) continue;
       var r;
-      if (el.matches('.btn, .link, .rating-card, .scroll-hint')) r = el.getBoundingClientRect();
+      if (el.matches('.btn, .link, .rating-card, .scroll-hint, .hero-svc, .hero-glass, .hero-adv')) r = el.getBoundingClientRect();
       else { rng.selectNodeContents(el); r = rng.getBoundingClientRect(); }
       if (!r.width || !r.height) continue;
       var top = r.top, bot = r.bottom;
@@ -995,6 +1019,16 @@
   var TOUCH_OFF = .7;   // центр капли выше пальца на 0.7 радиуса
   var tap = null, navPending = false;
 
+  /* тап в любой точке линзы: берём ближайшую рыбу (или условную точку), чтобы переход сработал */
+  function lensTarget(px, py) {
+    if (D.alpha < .6 || sdDropJS(px, py) >= 0) return null;
+    var sx = D.x + (px - D.x) / OPT.mag, sy = D.y + (py - D.y) / OPT.mag, best = null, bd = 1e9;
+    for (var i = 0; i < fishList.length; i++) {
+      var f = fishList[i], d = Math.hypot(sx - f.x, sy - f.y);
+      if (sprites[f.id] && d < bd) { bd = d; best = f; }
+    }
+    return best || { x: px, y: py, kx: 0, ky: 0, k: { dp: [0], ret: 0 }, fh: 0, fk: 0 };
+  }
   function fishGo(f, px, py) {
     if (navPending || busy) return;
     navPending = true;
@@ -1010,6 +1044,17 @@
     var p = localXY(e);
     ptr.type = e.pointerType;
     if (e.pointerType === 'touch') {
+      if (pend) {
+        /* ещё не решено: линза или листание. Быстро или вертикально за первые MOVE_PX — листание, без линзы */
+        pend.x = e.clientX; pend.y = e.clientY;
+        var pdx = e.clientX - pend.x0, pdy = e.clientY - pend.y0;
+        if (Math.hypot(pdx, pdy) >= MOVE_PX) {
+          var q = pend; clearPend();
+          var vertical = Math.abs(pdy) > Math.abs(pdx) * 0.8, fastMove = performance.now() - q.t0 < FAST_MS;
+          if (!vertical && !fastMove && !notWater({ clientX: e.clientX, clientY: e.clientY }, p)) startLens(e.clientX, e.clientY, false);
+        }
+        return;
+      }
       if (!ptr.down) return;
       ptr.x = p.x; ptr.y = p.y;
       if (tap) {
@@ -1031,29 +1076,46 @@
     if (mode === 'follow') { mode = 'off'; idleSince = performance.now(); hideDrop(); }
     hero.classList.remove('drop-on', 'fish-hover');
   });
+  /* жест линзы на телефоне: удержание HOLD_MS на воде, либо медленное горизонтальное ведение;
+     быстрый или вертикальный свайп отдаётся листанию сцен (touch-action у hero без нативной прокрутки, решение за JS) */
+  var HOLD_MS = 180, MOVE_PX = 12, FAST_MS = 60;
+  var pend = null, lensGesture = false;
+  function clearPend() { if (pend) { clearTimeout(pend.timer); pend = null; } }
+  function startLens(cx, cy, inside) {
+    var rect = hero.getBoundingClientRect(), p = { x: cx - rect.left, y: cy - rect.top };
+    if (!touchMode) { touchMode = true; measure(); }
+    ptr.type = 'touch';
+    var f = inside ? hitFish(p.x, p.y, true) : null;
+    tap = { f: f, inside: inside, t0: performance.now(), cx: cx, cy: cy, px: p.x, py: p.y, moved: false };
+    ptr.down = true; ptr.x = p.x; ptr.y = p.y;
+    lensGesture = true;
+    hero.classList.add('used');
+    mode = 'follow';
+    if (!inside) showDrop(p.x, p.y - R * TOUCH_OFF);
+  }
   hero.addEventListener('pointerdown', function (e) {
     if (!enabled || !heroOn || e.pointerType !== 'touch') return;
+    clearPend(); lensGesture = false;
     if (onTarget(e)) return;
     var p = localXY(e);
     if (notWater(e, p)) return;
-    if (!touchMode) { touchMode = true; measure(); }
-    ptr.type = 'touch';
     var inside = D.visible && D.alpha > .6 && sdDropJS(p.x, p.y) < 0;
-    var f = inside ? hitFish(p.x, p.y, true) : null;
-    tap = { f: f, inside: inside, t0: performance.now(), cx: e.clientX, cy: e.clientY, px: p.x, py: p.y, moved: false };
-    ptr.down = true; ptr.x = p.x; ptr.y = p.y;
-    hero.classList.add('used');
-    mode = 'follow';
-    if (!inside) {
-      showDrop(p.x, p.y - R * TOUCH_OFF);
-    }
+    if (inside) { startLens(e.clientX, e.clientY, true); return; }
+    pend = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t0: performance.now() };
+    pend.timer = setTimeout(function () {
+      var q = pend; pend = null;
+      if (!q || !enabled || !heroOn) return;
+      var r = hero.getBoundingClientRect();
+      if (!notWater({ clientX: q.x, clientY: q.y }, { x: q.x - r.left, y: q.y - r.top })) startLens(q.x, q.y, false);
+    }, HOLD_MS);
   });
   function touchEnd(e) {
+    clearPend();
     if (!enabled || e.pointerType !== 'touch' || !ptr.down) return;
     ptr.down = false;
     var tp = tap; tap = null;
     mode = 'hold'; holdUntil = performance.now() + 3000;
-    if (e.type === 'pointerup' && tp && tp.f && !tp.moved && performance.now() - tp.t0 < 250) fishGo(tp.f, tp.px, tp.py);
+    if (e.type === 'pointerup' && tp && tp.inside && !tp.moved && performance.now() - tp.t0 < 250) { var tf = tp.f || lensTarget(tp.px, tp.py); if (tf) fishGo(tf, tp.px, tp.py); }
   }
   hero.addEventListener('pointerup', touchEnd);
   hero.addEventListener('pointercancel', touchEnd);
@@ -1061,7 +1123,7 @@
     if (!enabled || ptr.type === 'touch' || onTarget(e)) return;
     var p = localXY(e);
     if (notWater(e, p)) return;
-    var f = hitFish(p.x, p.y, false);
+    var f = hitFish(p.x, p.y, false) || lensTarget(p.x, p.y);
     if (f) fishGo(f, p.x, p.y);
   });
 
@@ -1075,7 +1137,7 @@
     heroOn = on;
     if (on) { if (enabled) { resetTimers(); firstPatrolDone = true; startLoop(); } }
     else {
-      stopLoop(); mode = 'off'; ptr.in = false; ptr.down = false; tap = null;
+      stopLoop(); clearPend(); mode = 'off'; ptr.in = false; ptr.down = false; tap = null;
       D.visible = false; D.alpha = 0; D.ap = 0; D.av = 0;
       dropCv.style.opacity = '0'; dropCv.style.visibility = 'hidden';
       hero.classList.remove('drop-on', 'fish-hover');
@@ -1086,7 +1148,7 @@
      Сцены: менеджер, переходы, ввод
      ===================================================================== */
   var navLinks = [].slice.call(document.querySelectorAll('.scene-nav a'));
-  var vLinks = [].slice.call(document.querySelectorAll('.vnav a'));
+  var vLinks = [].slice.call(document.querySelectorAll('.vnav a, .tabbar a'));
   var cur = 0, busy = false, pendingIdx = null, lbOpen = false;
 
   function idxFromHash() {
@@ -1145,20 +1207,20 @@
       if (on) { s.removeAttribute('inert'); s.removeAttribute('aria-hidden'); }
       else { s.setAttribute('inert', ''); s.setAttribute('aria-hidden', 'true'); }
     });
-    navLinks.forEach(function (a, k) {
-      if (k === i) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+    navLinks.forEach(function (a) {
+      if (a.getAttribute('href') === '#' + IDS[i]) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
     });
-    vLinks.forEach(function (a, k) {
-      if (k === i) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+    vLinks.forEach(function (a) {
+      if (a.getAttribute('href') === '#' + IDS[i]) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
     });
     cur = i;
+    root.setAttribute('data-scene', IDS[i]);
     var inn = scenes[i].querySelector('.scene__inner');
     if (inn) inn.scrollTop = 0;
     if (statusEl) statusEl.textContent = STATUS.replace('{n}', i + 1).replace('{total}', scenes.length).replace('{title}', TITLES[i]);
     heroShown(i === 0);
     if (i > 0) { loadBg(i); loadBg(i + 1); }
-    if (i === 1) loadThumbs(4);
-    if (i === 2) loadThumbs(12);
+    if (IDS[i] === 'photos' || i === 2) loadThumbs(IDS[i] === 'photos' ? 12 : 4);
     scrollState();
   }
 
@@ -1314,7 +1376,7 @@
     if (!sw) return;
     var s = sw; sw = null;
     if (e.changedTouches && e.changedTouches.length) { s.x1 = e.changedTouches[0].clientX; s.y1 = e.changedTouches[0].clientY; }
-    if (busy || lbOpen || s.onWater) return;
+    if (busy || lbOpen || lensGesture) return;
     var dy = s.y0 - s.y1, dx = s.x0 - s.x1, dt = performance.now() - s.t0;
     var Hh = stage.clientHeight, ady = Math.abs(dy);
     var fast = cur === 0 ? (dt <= 450 && ady >= 80) : ((dt <= 700 || ady >= 0.25 * Hh) && ady >= Math.max(56, 0.08 * Hh));
@@ -1326,25 +1388,6 @@
   }
   stage.addEventListener('touchend', swipeEnd, { passive: true });
   stage.addEventListener('touchcancel', swipeEnd, { passive: true });
-
-  /* кнопки «Позвонить»: номер скрыт, короткий тост */
-  var toastEl = null, toastT = 0;
-  function showToast(msg) {
-    if (!toastEl) {
-      toastEl = document.createElement('div');
-      toastEl.className = 'toast'; toastEl.setAttribute('role', 'status'); toastEl.setAttribute('aria-live', 'polite');
-      document.body.appendChild(toastEl);
-    }
-    toastEl.textContent = msg;
-    void toastEl.offsetWidth;
-    toastEl.classList.add('is-on');
-    clearTimeout(toastT);
-    toastT = setTimeout(function () { toastEl.classList.remove('is-on'); }, 2000);
-  }
-  [].forEach.call(document.querySelectorAll('.act[aria-disabled="true"]'), function (a) {
-    a.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); showToast('Номер скрыт'); });
-    a.addEventListener('keydown', function (e) { if (e.key === ' ') { e.preventDefault(); e.stopPropagation(); showToast('Номер скрыт'); } });
-  });
 
   /* клавиатура */
   document.addEventListener('keydown', function (e) {
@@ -1493,30 +1536,34 @@
       lbOpenAt(i);
     });
   });
-  lb.querySelector('.lb__prev').addEventListener('click', function () { lbGo(-1); });
-  lb.querySelector('.lb__next').addEventListener('click', function () { lbGo(1); });
-  lb.querySelector('.lb__close').addEventListener('click', lbClose);
-  lb.addEventListener('click', function (e) { if (e.target === lb) lbClose(); });
+
+  /* управление лайтбоксом: кнопки, фон, стрелки, Esc, свайп; блокировка снимается при любом закрытии */
+  lb.querySelector('.lb__prev').addEventListener('click', function (e) { e.stopPropagation(); lbGo(-1); });
+  lb.querySelector('.lb__next').addEventListener('click', function (e) { e.stopPropagation(); lbGo(1); });
+  lb.querySelector('.lb__close').addEventListener('click', function (e) { e.stopPropagation(); lbClose(); });
+  lb.addEventListener('click', function (e) {
+    if (e.target === lb || (e.target.classList && e.target.classList.contains('lb__frame'))) lbClose();
+  });
   lb.addEventListener('cancel', function (e) { e.preventDefault(); lbClose(); });
-  lb.addEventListener('close', function () { lbOpen = false; });
-  lb.addEventListener('keydown', function (e) {
+  lb.addEventListener('close', function () {
+    lbOpen = false; lbClosing = false; lb.classList.remove('is-closing');
+    var a = links[lbIdx];
+    if (a && document.activeElement !== a) { try { a.focus({ preventScroll: true }); } catch (e) {} }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lbOpen) return;
     if (e.key === 'ArrowLeft') { e.preventDefault(); lbGo(-1); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); lbGo(1); }
-    else if (e.key === 'Home') { e.preventDefault(); lbSet(0); }
-    else if (e.key === 'End') { e.preventDefault(); lbSet(TOTAL - 1); }
+    else if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); lbClose(); }
   });
-  var lbT = null;
-  lb.addEventListener('touchstart', function (e) {
-    if (e.touches.length !== 1) { lbT = null; return; }
-    lbT = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, { passive: true });
+  var lbX0 = null;
+  lb.addEventListener('touchstart', function (e) { lbX0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
   lb.addEventListener('touchend', function (e) {
-    if (!lbT || !e.changedTouches.length) return;
-    var dx = e.changedTouches[0].clientX - lbT.x, dy = e.changedTouches[0].clientY - lbT.y;
-    lbT = null;
-    if (Math.abs(dx) >= 48 && Math.abs(dx) >= 1.4 * Math.abs(dy)) lbGo(dx < 0 ? 1 : -1);
-    else if (dy >= 96 && dy >= 1.4 * Math.abs(dx)) lbClose();
+    if (lbX0 === null || !e.changedTouches.length) return;
+    var dx = e.changedTouches[0].clientX - lbX0; lbX0 = null;
+    if (Math.abs(dx) > 50) lbGo(dx < 0 ? 1 : -1);
   }, { passive: true });
+
 
   /* ---------- старт ---------- */
   var startIdx = idxFromHash();
