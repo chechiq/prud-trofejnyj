@@ -1834,3 +1834,23 @@ html:not(.js) .g-card { width: auto; height: auto; aspect-ratio: var(--ar); }
   .scene--about .scene__bg::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10, 20, 40, .12) 0%, rgba(10, 20, 40, .05) 55%, rgba(10, 20, 40, .22) 100%); }
   .scene--loc .route__note { display: none; }
 }
+
+@media (min-width: 1024px) {
+  .tariff__items > div { grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
+  .tariff__items dt { min-width: 0; overflow-wrap: normal; }
+  .tariff__items dd { min-width: 0; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .tariff__items > div { grid-template-columns: 1fr; gap: 4px; padding-block: 8px; }
+  .tariff__items dt { font-size: 15px; line-height: 1.25; }
+  .tariff__items .price { justify-self: end; font-size: 36px; }
+  .tariff--guest .price { font-size: 36px; }
+}
+@media (max-width: 767px) {
+  .tariff--day .tariff__name, .tariff--night .tariff__name, .tariff--guest .tariff__name { margin: 0; }
+  .tariff--day, .tariff--night { min-height: 246px; padding-block: 16px 14px; }
+  .tariff__time { margin-top: 12px; }
+  .tariff__items { margin-top: 12px; gap: 8px; }
+  .tariff__items > div { padding-top: 8px; }
+  .tariff--guest { min-height: 180px; }
+}

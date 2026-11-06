@@ -233,6 +233,7 @@
   var mode = 'off';              // off | patrol | follow | hold
   var ptr = { x: 0, y: 0, in: false, down: false, type: 'mouse' };
   var startAt = 0, idleSince = 0, patrolStart = 0, patrolUntil = 0, holdUntil = 0, firstPatrolDone = false;
+  var introDone = false, introPatrol = false;
 
   function spring(o, key, vkey, target, k, z, dt) {
     var a = -k * (o[key] - target) - 2 * z * Math.sqrt(k) * o[vkey];
@@ -263,6 +264,9 @@
 
   function patrolPoint(t) {
     var tt = Math.PI * 2;
+    if (introPatrol) {
+      return { x: W * (.82 + .025 * Math.sin(t * 1.1)), y: horizonY + (H - horizonY) * (.4 + .035 * Math.sin(t * 1.4)) };
+    }
     return {
       x: W * (0.5 + 0.30 * Math.sin(tt * t / 14)),
       y: horizonY + (H - horizonY) * (0.5 + 0.26 * Math.sin(tt * t / 9 + 1.1))
@@ -275,10 +279,10 @@
     if (mode === 'off') {
       if (!touchMode) {
         if (!firstPatrolDone && now >= startAt) {
-          firstPatrolDone = true; mode = 'patrol'; patrolStart = now; patrolUntil = now + 2400;
+          firstPatrolDone = true; introDone = true; introPatrol = true; mode = 'patrol'; patrolStart = now; patrolUntil = now + 3200;
           var p0 = patrolPoint(0); showDrop(p0.x, p0.y);
         } else if (firstPatrolDone && !ptr.in && !D.visible && now - idleSince > 8000) {
-          mode = 'patrol'; patrolStart = now; patrolUntil = now + 2400;
+          introPatrol = false; mode = 'patrol'; patrolStart = now; patrolUntil = now + 2400;
           var p1 = patrolPoint(0); showDrop(p1.x, p1.y);
         }
       }
@@ -287,7 +291,7 @@
       setTarget(pp.x, pp.y);
       var hr = hero.getBoundingClientRect();
       D.visible = !overText(hr.left + pp.x, hr.top + pp.y);   // v5: не над текстом и кнопками
-      if (now > patrolUntil) { mode = 'off'; idleSince = now; hideDrop(); }
+      if (now > patrolUntil) { introPatrol = false; mode = 'off'; idleSince = now; hideDrop(); }
     } else if (mode === 'hold') {
       if (now > holdUntil) { mode = 'off'; idleSince = now; hideDrop(); }
     }
@@ -903,7 +907,10 @@
     dropCv.style.opacity = String(D.alpha);
     dropCv.style.transform = 'translate3d(' + D.ox + 'px,' + D.oy + 'px,0)';
     drawInner(now);
-    if (renderMode === 'gl') renderGL(); else render2D();
+    if (renderMode === 'gl') {
+      gl.uniform1f(glU.uSpecA, introPatrol ? .90 + .10 * Math.sin((now - patrolStart) / 3200 * Math.PI) : .90);
+      renderGL();
+    } else render2D();
     if (!fpsDone) {
       if (dt > .25) return;
       fpsN++; fpsT += dt;
@@ -928,8 +935,10 @@
     for (var i = 0; i < fishList.length; i++) fishList[i].hovT = fishList[i] === hovered ? 1 : 0;
     hero.classList.toggle('fish-hover', !!hovered);
     hero.classList.toggle('drop-on', !touchMode && ptr.in && mode === 'follow' && D.visible);
-    updateFish(now, dt);
-    updateSilt(now, dt);
+    if (D.visible || D.alpha > .002) {
+      updateFish(now, dt);
+      updateSilt(now, dt);
+    }
     drawDrop(now, raw);
   }
   function startLoop() {
@@ -961,9 +970,9 @@
   }
 
   function resetTimers() {
-    startAt = performance.now() + (touchMode ? 1200 : 600);
+    startAt = performance.now() + 1200;
     idleSince = performance.now();
-    mode = 'off'; firstPatrolDone = touchMode;   // на телефоне сам не появляется
+    mode = 'off'; introPatrol = false; firstPatrolDone = touchMode || introDone;   // на телефоне сам не появляется
     D.visible = false; D.alpha = 0; D.ap = 0; D.av = 0;
   }
 
@@ -1038,6 +1047,14 @@
     var ox = f.x, oy = f.y;
     setTimeout(function () { navPending = false; goTo(1, { push: true, via: 'fish', ox: ox, oy: oy }); }, 140);
   }
+
+  function stopIntro() {
+    introDone = true; firstPatrolDone = true;
+    if (introPatrol) { introPatrol = false; mode = 'off'; idleSince = performance.now(); hideDrop(); }
+  }
+  document.addEventListener('pointermove', stopIntro, { once: true, passive: true, capture: true });
+  document.addEventListener('pointerdown', stopIntro, { once: true, passive: true, capture: true });
+  document.addEventListener('keydown', stopIntro, { once: true });
 
   hero.addEventListener('pointermove', function (e) {
     if (!enabled || !heroOn) return;
@@ -1476,7 +1493,7 @@
   var lbAlt = lb.querySelector('.lb__alt');
   var lbCnt = lb.querySelector('.lb__count');
   var lbTpl = lbCnt.getAttribute('data-tpl') || '{n} / {total}';
-  var lbIdx = 0, lbAnim = null, lbClosing = false;
+  var lbIdx = 0, lbWanted = 0, lbAnim = null, lbClosing = false;
 
   function wrap(i) { return (i + TOTAL) % TOTAL; }
   function lbSet(i) {
@@ -1493,21 +1510,32 @@
     big.onload = function () { if (lbIdx === i) lbImg.src = big.src; };
     big.src = a.getAttribute('data-lg');
   }
+  function lbCancelAnimation() {
+    if (!lbAnim) return;
+    lbAnim.onfinish = null;
+    try { lbAnim.cancel(); } catch (e) {}
+    lbAnim = null;
+  }
   function lbGo(dir) {
-    var n = wrap(lbIdx + dir);
-    if (mqRM.matches || typeof lbImg.animate !== 'function' || lbAnim) { lbSet(n); return; }
+    if (!lbOpen || lbClosing) return;
+    var n = wrap(lbWanted + dir);
+    lbWanted = n;
+    lbCancelAnimation();
+    if (mqRM.matches || typeof lbImg.animate !== 'function') { lbSet(n); return; }
     lbAnim = lbImg.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: 0, transform: 'translateX(' + (-16 * dir) + 'px)' }],
       { duration: 140, easing: 'ease-in', fill: 'forwards' });
     lbAnim.onfinish = function () {
+      lbCancelAnimation();
       lbSet(n);
       var a2 = lbImg.animate([{ opacity: 0, transform: 'translateX(' + (16 * dir) + 'px)' }, { opacity: 1, transform: 'translateX(0)' }],
         { duration: 200, easing: EASE });
-      try { lbAnim.cancel(); } catch (e) {}
       lbAnim = a2;
-      a2.onfinish = function () { lbAnim = null; };
+      a2.onfinish = function () { if (lbAnim === a2) lbAnim = null; };
     };
   }
   function lbOpenAt(i) {
+    lbCancelAnimation();
+    lbWanted = i;
     lbSet(i);
     lbClosing = false;
     lb.classList.remove('is-closing');
@@ -1517,6 +1545,8 @@
   }
   function lbClose() {
     if (!lbOpen || lbClosing) return;
+    lbCancelAnimation();
+    lbWanted = lbIdx;
     lbClosing = true;
     var fin = function () {
       lbClosing = false;
@@ -1546,6 +1576,7 @@
   });
   lb.addEventListener('cancel', function (e) { e.preventDefault(); lbClose(); });
   lb.addEventListener('close', function () {
+    lbCancelAnimation();
     lbOpen = false; lbClosing = false; lb.classList.remove('is-closing');
     var a = links[lbIdx];
     if (a && document.activeElement !== a) { try { a.focus({ preventScroll: true }); } catch (e) {} }
