@@ -1827,3 +1827,10 @@ html:not(.js) .g-card { width: auto; height: auto; aspect-ratio: var(--ar); }
   .loc__banner .loc__banner-s { font-size: 42px; line-height: 1.25; }
   .loc__grid { gap: 10px; }
 }
+
+/* v22: фон «О пруде» другой снимок (на десктопе), без фразы про отзывы о дороге */
+@media (min-width: 1024px) {
+  .scene--about .scene__photo { background-image: url("../img/gallery/gallery-03-lg.webp") !important; background-position: 50% 60%; }
+  .scene--about .scene__bg::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10, 20, 40, .12) 0%, rgba(10, 20, 40, .05) 55%, rgba(10, 20, 40, .22) 100%); }
+  .scene--loc .route__note { display: none; }
+}
