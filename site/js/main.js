@@ -5,20 +5,16 @@
   var root = document.documentElement;
   var stage = document.querySelector('.stage');
   var scenes = [].slice.call(document.querySelectorAll('.scene'));
-  /* десктоп (от 1024): порядок меню и сцен как в макете: Пруд, О пруде, Фото, Цены, Как добраться; на телефоне Цены перед Фото */
-  var deskOrder = window.matchMedia('(min-width: 1024px)').matches;
-  if (deskOrder) {
-    var iPh = -1, iPr = -1;
-    scenes.forEach(function (s, k) { if (s.id === 'photos') iPh = k; if (s.id === 'prices') iPr = k; });
-    if (iPh > iPr && iPr > 0) { var tmp = scenes[iPh]; scenes[iPh] = scenes[iPr]; scenes[iPr] = tmp; }
-  }
+  var sceneOrder = ['top', 'about', 'photos', 'prices', 'location'];
+  scenes.sort(function (a, b) { return sceneOrder.indexOf(a.id) - sceneOrder.indexOf(b.id); });
   var hero = document.getElementById('top');
   if (!stage || !scenes.length || !hero) return;
   root.classList.add('js-scenes');
+  scenes.forEach(function (sc) { stage.appendChild(sc); });
 
   var IDS = scenes.map(function (s) { return s.id; });
   var TITLES = scenes.map(function (s) { return s.getAttribute('data-title') || ''; });
-  if (deskOrder) {
+  {
     var NEXT_T = { top: 'К началу', about: 'О пруде', photos: 'Фото', prices: 'Цены', location: 'Проезд' };
     var BACK_T = { top: 'началу', about: 'разделу «О пруде»', photos: 'разделу «Фото»', prices: 'разделу «Цены»', location: 'разделу «Как добраться»' };
     scenes.forEach(function (sc, k) {
@@ -30,7 +26,7 @@
         var nt = next.querySelector('.next__t'); if (nt) nt.textContent = NEXT_T[IDS[k + 1]];
       }
     });
-    ['.scene-nav', '.vnav'].forEach(function (q) {
+    ['.scene-nav', '.vnav', '.tabbar'].forEach(function (q) {
       var box = document.querySelector(q); if (!box) return;
       IDS.forEach(function (id) { var a = box.querySelector('a[href="#' + id + '"]'); if (a) box.appendChild(a); });
     });
@@ -67,6 +63,7 @@
      ===================================================================== */
   var surfaceImg = hero.querySelector('img.surface');
   var dropCv = hero.querySelector('canvas.drop');
+  var lensZone = hero.querySelector('.lens-zone');
   var underImg = null;
   var W = 0, H = 0, dpr = 1, horizonY = 0, imgLeft = 0, imgTop = 0, imgScale = 1;
   var touchMode = coarseMQ.matches;
@@ -80,9 +77,9 @@
     if (!w || !h) return false;
     W = w; H = h;
     var posX = W >= 1024 ? 0.50 : 0.52;
-    imgScale = Math.max(W / 1280, H / 872);
+    imgScale = Math.max(W / 1280, H / 872) * (W < 1024 ? 1.2 : 1);
     imgLeft = (W - 1280 * imgScale) * posX;
-    imgTop = (H - 872 * imgScale) * 0.40;
+    imgTop = (H - 872 * imgScale) * (W < 1024 ? 1 : .40);
     horizonY = imgTop + 460 * imgScale;
     hero.style.setProperty('--hz', horizonY.toFixed(1) + 'px');
     return true;
@@ -96,7 +93,7 @@
   var gl = null, glProg = null, glU = {}, glTex = null, ctx2 = null, renderMode = 'none';
 
   function sizeDrop() {
-    R = touchMode ? Math.min(58, .16 * W) : clamp(.065 * W, 64, 92);   // v5: капля меньше на ~23%
+    R = W < 1024 && H < 480 ? clamp(.065 * W, 48, 56) : touchMode || W < 1024 ? clamp(.17 * W, 64, 76) : clamp(.065 * W, 64, 92);   // v5: капля меньше на ~23%
     PAD = Math.round(.4 * R + 16);
     HALF = Math.round(R + PAD);
     CSSZ = HALF * 2;
@@ -248,6 +245,12 @@
     return smin(c, Math.hypot(tx, ty) - r * (1 - 0.42 * D.k), Math.max(0.45 * r * clamp(D.k * 3, 0, 1), 0.01));
   }
   function clampTarget(x, y) {
+    if (touchMode && W < 1024) {
+      var hr = hero.getBoundingClientRect(), zr = lensZone && lensZone.getBoundingClientRect();
+      var minY = waterTop() + R + 4;
+      var maxY = (zr ? zr.bottom - hr.top : H) - R - 8;
+      return { x: clamp(x, R + 8, W - R - 8), y: clamp(y, minY, Math.max(minY, maxY)) };
+    }
     var m = R * 0.4 + 8;
     return { x: clamp(x, m, W - m), y: clamp(y, m, H - m) };
   }
@@ -991,6 +994,7 @@
   }
   function disable() {
     enabled = false;
+    if (lensPointer !== null) touchEnd({ type: 'pointercancel', pointerType: 'touch', pointerId: lensPointer });
     stopLoop();
     root.classList.remove('js-fx');
     hero.classList.remove('drop-on', 'fish-hover');
@@ -1025,7 +1029,12 @@
     var rect = hero.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
-  var TOUCH_OFF = .7;   // центр капли выше пальца на 0.7 радиуса
+  function touchDropY(y) { return y - R - 24; }
+  function inLensZone(p) {
+    if (!lensZone || W >= 1024) return p.y >= waterTop();
+    var hr = hero.getBoundingClientRect(), r = lensZone.getBoundingClientRect();
+    return p.x >= r.left - hr.left && p.x <= r.right - hr.left && p.y >= r.top - hr.top && p.y <= r.bottom - hr.top;
+  }
   var tap = null, navPending = false;
 
   /* тап в любой точке линзы: берём ближайшую рыбу (или условную точку), чтобы переход сработал */
@@ -1061,25 +1070,14 @@
     var p = localXY(e);
     ptr.type = e.pointerType;
     if (e.pointerType === 'touch') {
-      if (pend) {
-        /* ещё не решено: линза или листание. Быстро или вертикально за первые MOVE_PX — листание, без линзы */
-        pend.x = e.clientX; pend.y = e.clientY;
-        var pdx = e.clientX - pend.x0, pdy = e.clientY - pend.y0;
-        if (Math.hypot(pdx, pdy) >= MOVE_PX) {
-          var q = pend; clearPend();
-          var vertical = Math.abs(pdy) > Math.abs(pdx) * 0.8, fastMove = performance.now() - q.t0 < FAST_MS;
-          if (!vertical && !fastMove && !notWater({ clientX: e.clientX, clientY: e.clientY }, p)) startLens(e.clientX, e.clientY, false);
-        }
-        return;
-      }
-      if (!ptr.down) return;
+      if (!ptr.down || e.pointerId !== lensPointer) return;
       ptr.x = p.x; ptr.y = p.y;
       if (tap) {
         if (Math.hypot(e.clientX - tap.cx, e.clientY - tap.cy) >= 10) tap.moved = true;
         if (tap.inside && !tap.moved) return;
       }
       mode = 'follow';
-      showDrop(p.x, p.y - R * TOUCH_OFF);
+      showDrop(p.x, touchDropY(p.y));
       return;
     }
     if (touchMode) { touchMode = false; measure(); }
@@ -1093,49 +1091,56 @@
     if (mode === 'follow') { mode = 'off'; idleSince = performance.now(); hideDrop(); }
     hero.classList.remove('drop-on', 'fish-hover');
   });
-  /* жест линзы на телефоне: удержание HOLD_MS на воде, либо медленное горизонтальное ведение;
-     быстрый или вертикальный свайп отдаётся листанию сцен (touch-action у hero без нативной прокрутки, решение за JS) */
-  var HOLD_MS = 180, MOVE_PX = 12, FAST_MS = 60;
-  var pend = null, lensGesture = false;
+  var pend = null, lensGesture = false, lensPointer = null;
   function clearPend() { if (pend) { clearTimeout(pend.timer); pend = null; } }
-  function startLens(cx, cy, inside) {
+  function releaseLensPointer() {
+    var id = lensPointer;
+    lensPointer = null;
+    if (id !== null && hero.hasPointerCapture && hero.hasPointerCapture(id)) hero.releasePointerCapture(id);
+  }
+  function startLens(cx, cy, inside, pointerId) {
     var rect = hero.getBoundingClientRect(), p = { x: cx - rect.left, y: cy - rect.top };
     if (!touchMode) { touchMode = true; measure(); }
     ptr.type = 'touch';
     var f = inside ? hitFish(p.x, p.y, true) : null;
     tap = { f: f, inside: inside, t0: performance.now(), cx: cx, cy: cy, px: p.x, py: p.y, moved: false };
     ptr.down = true; ptr.x = p.x; ptr.y = p.y;
+    lensPointer = pointerId;
+    if (hero.setPointerCapture && pointerId !== undefined) hero.setPointerCapture(pointerId);
     lensGesture = true;
     hero.classList.add('used');
     mode = 'follow';
-    if (!inside) showDrop(p.x, p.y - R * TOUCH_OFF);
+    if (!inside) showDrop(p.x, touchDropY(p.y));
   }
   hero.addEventListener('pointerdown', function (e) {
-    if (!enabled || !heroOn || e.pointerType !== 'touch') return;
+    if (!enabled || !heroOn || e.pointerType !== 'touch' || e.isPrimary === false || lensPointer !== null) return;
     clearPend(); lensGesture = false;
     if (onTarget(e)) return;
     var p = localXY(e);
-    if (notWater(e, p)) return;
     var inside = D.visible && D.alpha > .6 && sdDropJS(p.x, p.y) < 0;
-    if (inside) { startLens(e.clientX, e.clientY, true); return; }
-    pend = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t0: performance.now() };
-    pend.timer = setTimeout(function () {
-      var q = pend; pend = null;
-      if (!q || !enabled || !heroOn) return;
-      var r = hero.getBoundingClientRect();
-      if (!notWater({ clientX: q.x, clientY: q.y }, { x: q.x - r.left, y: q.y - r.top })) startLens(q.x, q.y, false);
-    }, HOLD_MS);
+    if (!inside && (!inLensZone(p) || notWater(e, p))) return;
+    startLens(e.clientX, e.clientY, inside, e.pointerId);
   });
   function touchEnd(e) {
     clearPend();
-    if (!enabled || e.pointerType !== 'touch' || !ptr.down) return;
+    if (e.pointerType !== 'touch' || !ptr.down || e.pointerId !== lensPointer) return;
     ptr.down = false;
     var tp = tap; tap = null;
+    releaseLensPointer();
+    if (e.type !== 'pointerup') {
+      mode = 'off'; lensGesture = false; sw = null; hideDrop(); return;
+    }
     mode = 'hold'; holdUntil = performance.now() + 3000;
-    if (e.type === 'pointerup' && tp && tp.inside && !tp.moved && performance.now() - tp.t0 < 250) { var tf = tp.f || lensTarget(tp.px, tp.py); if (tf) fishGo(tf, tp.px, tp.py); }
+    if (tp && tp.inside && !tp.moved && performance.now() - tp.t0 < 250) {
+      var tf = tp.f || lensTarget(tp.px, tp.py); if (tf) fishGo(tf, tp.px, tp.py);
+    }
   }
   hero.addEventListener('pointerup', touchEnd);
   hero.addEventListener('pointercancel', touchEnd);
+  hero.addEventListener('lostpointercapture', function (e) {
+    if (e.pointerId !== lensPointer) return;
+    touchEnd({ type: 'pointercancel', pointerType: 'touch', pointerId: e.pointerId });
+  });
   hero.addEventListener('click', function (e) {
     if (!enabled || ptr.type === 'touch' || onTarget(e)) return;
     var p = localXY(e);
@@ -1144,7 +1149,9 @@
     if (f) fishGo(f, p.x, p.y);
   });
 
-  function onHeroResize() { measure(); if (enabled) { makeFish(); makeSilt(); } }
+  function onHeroResize() {
+    if (lensPointer !== null) touchEnd({ type: 'pointercancel', pointerType: 'touch', pointerId: lensPointer });
+    measure(); if (enabled) { makeFish(); makeSilt(); } }
   if ('ResizeObserver' in window) new ResizeObserver(onHeroResize).observe(hero);
   else window.addEventListener('resize', onHeroResize);
   document.addEventListener('visibilitychange', function () { if (document.hidden) stopLoop(); else startLoop(); });
@@ -1154,7 +1161,7 @@
     heroOn = on;
     if (on) { if (enabled) { resetTimers(); firstPatrolDone = true; startLoop(); } }
     else {
-      stopLoop(); clearPend(); mode = 'off'; ptr.in = false; ptr.down = false; tap = null;
+      stopLoop(); clearPend(); releaseLensPointer(); lensGesture = false; mode = 'off'; ptr.in = false; ptr.down = false; tap = null;
       D.visible = false; D.alpha = 0; D.ap = 0; D.av = 0;
       dropCv.style.opacity = '0'; dropCv.style.visibility = 'hidden';
       hero.classList.remove('drop-on', 'fish-hover');
@@ -1393,7 +1400,8 @@
     if (!sw) return;
     var s = sw; sw = null;
     if (e.changedTouches && e.changedTouches.length) { s.x1 = e.changedTouches[0].clientX; s.y1 = e.changedTouches[0].clientY; }
-    if (busy || lbOpen || lensGesture) return;
+    var wasLens = lensGesture; lensGesture = false;
+    if (busy || lbOpen || wasLens || e.type === 'touchcancel') return;
     var dy = s.y0 - s.y1, dx = s.x0 - s.x1, dt = performance.now() - s.t0;
     var Hh = stage.clientHeight, ady = Math.abs(dy);
     var fast = cur === 0 ? (dt <= 450 && ady >= 80) : ((dt <= 700 || ady >= 0.25 * Hh) && ady >= Math.max(56, 0.08 * Hh));
