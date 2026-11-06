@@ -34,6 +34,7 @@
   var statusEl = document.getElementById('scene-status');
   var STATUS = (statusEl && statusEl.getAttribute('data-tpl')) || '{n}/{total}: {title}';
   var mqRM = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var desktopMQ = window.matchMedia('(min-width: 1024px)');
   var coarseMQ = window.matchMedia('(pointer: coarse)');
   var EASE = 'cubic-bezier(.2,.7,.2,1)';
 
@@ -953,6 +954,7 @@
 
   /* ---------- загрузка ресурсов эффекта ---------- */
   function loadEffectAssets() {
+    if (!enabled || !desktopMQ.matches || mqRM.matches) return;
     if (!underLoaded) { underLoaded = true; underImg = new Image(); underImg.src = 'img/underwater.webp'; }
     if (!spritesRequested) { spritesRequested = true; if (fishSetKey) SETS[fishSetKey].forEach(loadSprite); }
   }
@@ -980,7 +982,7 @@
   }
 
   function enable() {
-    if (enabled) return;
+    if (enabled || !desktopMQ.matches || mqRM.matches) return;
     if (renderMode === 'none') renderMode = initGL() ? 'gl' : '2d';
     if (renderMode === '2d' && !ctx2) { ctx2 = dropCv.getContext('2d'); }
     if (renderMode === '2d' && !ctx2) { return; }
@@ -994,13 +996,14 @@
   }
   function disable() {
     enabled = false;
-    if (lensPointer !== null) touchEnd({ type: 'pointercancel', pointerType: 'touch', pointerId: lensPointer });
-    stopLoop();
+    stopLoop(); clearPend(); releaseLensPointer();
+    ptr.down = false; ptr.in = false; tap = null; lensGesture = false; sw = null;
     root.classList.remove('js-fx');
     hero.classList.remove('drop-on', 'fish-hover');
-    mode = 'off'; D.visible = false; D.alpha = 0;
+    mode = 'off'; introPatrol = false; D.visible = false; D.alpha = 0; D.ap = 0; D.av = 0;
+    dropCv.style.opacity = '0'; dropCv.style.visibility = 'hidden';
   }
-  function syncMotion() { if (mqRM.matches) disable(); else enable(); }
+  function syncMotion() { if (mqRM.matches || !desktopMQ.matches) disable(); else enable(); }
 
   /* ---------- указатель ---------- */
   function onTarget(e) { return e.target && e.target.closest && e.target.closest('a,button'); }
@@ -1150,12 +1153,14 @@
   });
 
   function onHeroResize() {
+    syncMotion();
     if (lensPointer !== null) touchEnd({ type: 'pointercancel', pointerType: 'touch', pointerId: lensPointer });
     measure(); if (enabled) { makeFish(); makeSilt(); } }
   if ('ResizeObserver' in window) new ResizeObserver(onHeroResize).observe(hero);
   else window.addEventListener('resize', onHeroResize);
   document.addEventListener('visibilitychange', function () { if (document.hidden) stopLoop(); else startLoop(); });
   if (mqRM.addEventListener) mqRM.addEventListener('change', syncMotion); else if (mqRM.addListener) mqRM.addListener(syncMotion);
+  if (desktopMQ.addEventListener) desktopMQ.addEventListener('change', syncMotion); else if (desktopMQ.addListener) desktopMQ.addListener(syncMotion);
 
   function heroShown(on) {
     heroOn = on;
