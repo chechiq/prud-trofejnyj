@@ -1,0 +1,18 @@
+# в репозиторий идёт только сайт, README и деплой
+/*
+!/site/
+!/README.md
+!/.github/
+!/.gitignore
+
+# рабочие файлы внутри site: спецификация (там полный телефон) и неиспользуемые картинки
+site/SPEC.md
+site/img/pond-sunset.webp
+site/img/shore-dusk.webp
+site/img/shore-sunset.webp
+site/img/shore.webp
+site/img/surface.webp
+site/images/
+
+Thumbs.db
+.DS_Store
